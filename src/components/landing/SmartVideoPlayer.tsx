@@ -41,15 +41,31 @@ export function SmartVideoPlayer({
       onTimeUpdateRef.current(video.currentTime, video.duration);
     };
 
+    // Trigger initial progress as soon as metadata is loaded
+    const handleLoadedMetadata = () => {
+      if (video.duration > 0) {
+        onTimeUpdateRef.current(video.currentTime, video.duration);
+      }
+    };
+
     const handlePlay = () => onPlayPauseRef.current(true);
     const handlePause = () => onPlayPauseRef.current(false);
 
     video.addEventListener('timeupdate', handleTimeUpdate);
+    video.addEventListener('loadedmetadata', handleLoadedMetadata);
+    video.addEventListener('durationchange', handleLoadedMetadata);
     video.addEventListener('play', handlePlay);
     video.addEventListener('pause', handlePause);
 
+    // If metadata already loaded, trigger immediately
+    if (video.duration > 0) {
+      handleLoadedMetadata();
+    }
+
     return () => {
       video.removeEventListener('timeupdate', handleTimeUpdate);
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      video.removeEventListener('durationchange', handleLoadedMetadata);
       video.removeEventListener('play', handlePlay);
       video.removeEventListener('pause', handlePause);
     };
