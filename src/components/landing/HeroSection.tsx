@@ -50,6 +50,7 @@ export function HeroSection({
         {/* Video Player */}
         <div className="w-full max-w-3xl mx-auto mt-8">
           <SmartVideoPlayer
+            videoUrl="https://formacaocloser.b-cdn.net/copy_64B2EF33-32DD-4816-8FD5-D93AEEABCB23.mp4"
             displayProgress={displayProgress}
             isPlaying={isPlaying}
             onPlayPause={onPlayPause}
