@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef } from 'react';
 import { Header } from '@/components/landing/Header';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { BenefitsSection } from '@/components/landing/BenefitsSection';
@@ -9,20 +9,13 @@ import { useVideoProgress } from '@/hooks/useVideoProgress';
 export default function Index() {
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const handleUnlock = useCallback(() => {
-    // Smooth scroll to content when unlocked
-    setTimeout(() => {
-      contentRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 500);
-  }, []);
-
   const {
     displayProgress,
     isPlaying,
     setIsPlaying,
     updateProgress,
     hasUnlocked,
-  } = useVideoProgress({ onUnlock: handleUnlock, unlockThreshold: 0.5 });
+  } = useVideoProgress({ unlockThreshold: 0.5 });
 
   const scrollToContent = () => {
     contentRef.current?.scrollIntoView({ behavior: 'smooth' });
