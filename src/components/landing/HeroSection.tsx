@@ -9,6 +9,7 @@ interface HeroSectionProps {
   onPlayPause: (playing: boolean) => void;
   onTimeUpdate: (currentTime: number, duration: number) => void;
   onScrollToContent: () => void;
+  onCTAClick: () => void;
 }
 
 export function HeroSection({
@@ -18,6 +19,7 @@ export function HeroSection({
   onPlayPause,
   onTimeUpdate,
   onScrollToContent,
+  onCTAClick,
 }: HeroSectionProps) {
   return (
     <section className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative">
@@ -63,7 +65,7 @@ export function HeroSection({
           <Button 
             size="lg" 
             className="btn-cta text-lg px-8 py-6"
-            onClick={() => window.location.href = '/checkout'}
+            onClick={onCTAClick}
           >
             Matricule-se Agora
           </Button>
