@@ -1,6 +1,5 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
-import { useState } from 'react';
 
 interface SmartVideoPlayerProps {
   videoUrl?: string;
@@ -23,16 +22,27 @@ export function SmartVideoPlayer({
   const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
 
+  // Use refs to keep callbacks stable and avoid re-registering event listeners
+  const onPlayPauseRef = useRef(onPlayPause);
+  const onTimeUpdateRef = useRef(onTimeUpdate);
+
+  // Keep refs updated with latest callbacks
+  useEffect(() => {
+    onPlayPauseRef.current = onPlayPause;
+    onTimeUpdateRef.current = onTimeUpdate;
+  });
+
+  // Register event listeners only once
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     const handleTimeUpdate = () => {
-      onTimeUpdate(video.currentTime, video.duration);
+      onTimeUpdateRef.current(video.currentTime, video.duration);
     };
 
-    const handlePlay = () => onPlayPause(true);
-    const handlePause = () => onPlayPause(false);
+    const handlePlay = () => onPlayPauseRef.current(true);
+    const handlePause = () => onPlayPauseRef.current(false);
 
     video.addEventListener('timeupdate', handleTimeUpdate);
     video.addEventListener('play', handlePlay);
@@ -43,7 +53,7 @@ export function SmartVideoPlayer({
       video.removeEventListener('play', handlePlay);
       video.removeEventListener('pause', handlePause);
     };
-  }, [onTimeUpdate, onPlayPause]);
+  }, []);
 
   const togglePlay = () => {
     const video = videoRef.current;
