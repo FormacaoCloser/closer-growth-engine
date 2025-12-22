@@ -1,13 +1,18 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Header } from '@/components/landing/Header';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { BenefitsSection } from '@/components/landing/BenefitsSection';
+import { ObjectionsSection } from '@/components/landing/ObjectionsSection';
+import { InstructorSection } from '@/components/landing/InstructorSection';
 import { CTASection } from '@/components/landing/CTASection';
+import { MiniCTASection } from '@/components/landing/MiniCTASection';
+import { LeadCaptureModal } from '@/components/landing/LeadCaptureModal';
 import { Footer } from '@/components/landing/Footer';
 import { useVideoProgress } from '@/hooks/useVideoProgress';
 
 export default function Index() {
   const contentRef = useRef<HTMLDivElement>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const {
     displayProgress,
@@ -19,6 +24,10 @@ export default function Index() {
 
   const scrollToContent = () => {
     contentRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleCTAClick = () => {
+    setIsModalOpen(true);
   };
 
   return (
@@ -33,6 +42,7 @@ export default function Index() {
         onPlayPause={setIsPlaying}
         onTimeUpdate={updateProgress}
         onScrollToContent={scrollToContent}
+        onCTAClick={handleCTAClick}
       />
 
       {/* Locked Content - Only visible after 50% video */}
@@ -45,9 +55,19 @@ export default function Index() {
         }`}
       >
         <BenefitsSection />
-        <CTASection />
+        <CTASection onCTAClick={handleCTAClick} />
+        <ObjectionsSection />
+        <MiniCTASection onCTAClick={handleCTAClick} />
+        <InstructorSection />
+        <CTASection onCTAClick={handleCTAClick} />
         <Footer />
       </div>
+
+      {/* Lead Capture Modal */}
+      <LeadCaptureModal 
+        open={isModalOpen} 
+        onOpenChange={setIsModalOpen} 
+      />
     </div>
   );
 }

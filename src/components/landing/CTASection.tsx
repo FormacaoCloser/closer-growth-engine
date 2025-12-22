@@ -1,7 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { Shield, Zap, Users } from 'lucide-react';
 
-export function CTASection() {
+interface CTASectionProps {
+  onCTAClick: () => void;
+}
+
+export function CTASection({ onCTAClick }: CTASectionProps) {
   return (
     <section className="py-20 px-4 relative overflow-hidden">
       {/* Background Gradient */}
@@ -35,7 +39,7 @@ export function CTASection() {
           <Button 
             size="lg" 
             className="btn-cta text-lg px-10 py-7"
-            onClick={() => window.location.href = '/checkout'}
+            onClick={onCTAClick}
           >
             Matricule-se Agora
           </Button>
