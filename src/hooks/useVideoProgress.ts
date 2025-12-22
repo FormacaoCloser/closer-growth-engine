@@ -11,15 +11,17 @@ export function useVideoProgress({ onUnlock, unlockThreshold = 0.5 }: UseVideoPr
   const [hasUnlocked, setHasUnlocked] = useState(false);
   const hasTriggeredUnlock = useRef(false);
 
-  // Barra de progresso "enganosa" - começa rápido e desacelera
+  // Barra de progresso "enganosa" - começa MUITO rápido e desacelera
   const calculateDisplayProgress = useCallback((real: number): number => {
-    if (real <= 0.2) {
-      // Primeiros 20% reais = 40% visual (2x mais rápido)
-      return real * 2;
+    if (real <= 0.05) {
+      // Primeiros 5% reais = 25% visual (5x mais rápido!)
+      return real * 5;
+    } else if (real <= 0.15) {
+      // 5-15% real = 25-50% visual (ainda 2.5x mais rápido)
+      return 0.25 + ((real - 0.05) / 0.10) * 0.25;
     } else {
-      // Restante: desacelera gradualmente
-      // 20-100% real = 40-100% visual
-      return 0.4 + ((real - 0.2) / 0.8) * 0.6;
+      // 15-100% real = 50-100% visual (muito mais lento)
+      return 0.50 + ((real - 0.15) / 0.85) * 0.50;
     }
   }, []);
 
