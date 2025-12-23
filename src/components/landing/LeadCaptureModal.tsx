@@ -92,13 +92,13 @@ export function LeadCaptureModal({ open, onOpenChange }: LeadCaptureModalProps) 
         }
       }
 
-      // Create abandoned cart for remarketing
+      // Create abandoned cart for remarketing (only if course exists)
       const { data: coursesData } = await supabase
         .from('courses')
         .select('id')
         .eq('is_active', true)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (coursesData) {
         await supabase
