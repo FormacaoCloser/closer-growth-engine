@@ -3,33 +3,33 @@ import { Home, Clock, DollarSign, TrendingUp, GraduationCap, Rocket } from 'luci
 const benefits = [
   {
     icon: Home,
-    title: 'Home Office',
-    description: 'Trabalhe de qualquer lugar do mundo, só precisa de um computador e internet.',
+    title: 'Modelo Flexível',
+    description: 'Vagas remotas, híbridas ou presenciais. Você escolhe o que combina com seu estilo.',
   },
   {
     icon: Clock,
-    title: '~4 Horas por Dia',
-    description: 'Jornada flexível, sem bater ponto. Você decide seus horários.',
+    title: 'Carreira Sólida',
+    description: 'Contrato CLT ou PJ com salário fixo + comissões. Estabilidade + potencial de ganhos.',
   },
   {
     icon: DollarSign,
     title: 'R$10-30k/mês',
-    description: 'Ganhos reais de closers no mercado brasileiro. Comissões atrativas.',
+    description: 'Salário base + comissões por performance. Quanto mais vende, mais ganha.',
   },
   {
     icon: TrendingUp,
-    title: 'Mercado em Alta',
-    description: 'Demanda crescente por profissionais qualificados. Empresas precisam de você.',
+    title: 'Mercado Aquecido',
+    description: 'Startups, SaaS, consultorias - todas precisam de vendedores qualificados.',
   },
   {
     icon: GraduationCap,
     title: 'Sem Faculdade',
-    description: 'Não precisa de diploma. O que vale é resultado, não papel na parede.',
+    description: 'O que importa é resultado. Empresas contratam por skill, não por diploma.',
   },
   {
     icon: Rocket,
-    title: 'Rápido para Começar',
-    description: 'Em poucas semanas você pode estar fazendo suas primeiras vendas.',
+    title: 'Alta Empregabilidade',
+    description: 'Vagas abertas todo mês. A demanda por closers supera a oferta no Brasil.',
   },
 ];
 

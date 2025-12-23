@@ -55,7 +55,7 @@ const journeySteps = [
     step: 6,
     title: 'Contratado',
     subtitle: 'Meta alcançada',
-    description: 'Como se candidatar, entrevistas assertivas e conquistar sua primeira vaga de closer.',
+    description: 'Como se posicionar, passar em entrevistas e ser contratado em startups e empresas.',
     icon: Rocket,
     color: 'from-accent to-chart-1',
     isEnd: true,
