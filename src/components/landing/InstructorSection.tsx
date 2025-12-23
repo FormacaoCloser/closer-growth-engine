@@ -1,21 +1,35 @@
-import { Play, Award, Users, Target } from 'lucide-react';
+import { Play } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { CMSContent, getCMSValue, getCMSJson } from '@/hooks/useCMSContent';
+import { getIcon } from '@/lib/iconMap';
 
-const stats = [
-  { icon: Award, value: '7+ anos', label: 'de experiência' },
-  { icon: Users, value: '2.000+', label: 'alunos formados' },
-  { icon: Target, value: 'R$50M+', label: 'em vendas fechadas' },
+interface StatItem {
+  icon: string;
+  value: string;
+  label: string;
+}
+
+const defaultStats: StatItem[] = [
+  { icon: 'Award', value: '7+ anos', label: 'de experiência' },
+  { icon: 'Users', value: '2.000+', label: 'alunos formados' },
+  { icon: 'Target', value: 'R$50M+', label: 'em vendas fechadas' },
 ];
 
 interface InstructorSectionProps {
-  videoUrl?: string;
+  content?: CMSContent[];
 }
 
-export function InstructorSection({ 
-  videoUrl = '' // Deixar vazio para o usuário definir depois
-}: InstructorSectionProps) {
+export function InstructorSection({ content }: InstructorSectionProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  // Get CMS values with fallbacks
+  const title = getCMSValue(content, 'instructor_title', 'Quem é <span class="text-gradient">Alexandre Closer</span>?');
+  const subtitle = getCMSValue(content, 'instructor_subtitle', 'Conheça quem vai te guiar nessa jornada de transformação profissional.');
+  const bio1 = getCMSValue(content, 'instructor_bio1', 'Alexandre começou sua jornada em vendas há mais de 7 anos, quando o termo "closer" ainda nem existia no Brasil. Depois de fechar milhões em vendas para grandes empresas do digital, decidiu compartilhar seu método com quem quer transformar sua vida através das vendas.');
+  const bio2 = getCMSValue(content, 'instructor_bio2', 'Sua metodologia é prática, direta e focada em resultados. Nada de teoria acadêmica que não funciona no mundo real. Apenas o que realmente faz você fechar vendas e colocar dinheiro no bolso.');
+  const videoUrl = getCMSValue(content, 'instructor_video_url', '');
+  const stats = getCMSJson<StatItem[]>(content, 'instructor_stats', defaultStats);
 
   const handlePlayPause = () => {
     if (!videoRef.current) return;
@@ -33,11 +47,12 @@ export function InstructorSection({
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-16 space-y-4">
-          <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground">
-            Quem é <span className="text-gradient">Alexandre Closer</span>?
-          </h2>
+          <h2 
+            className="text-3xl md:text-4xl font-display font-bold text-foreground"
+            dangerouslySetInnerHTML={{ __html: title }}
+          />
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Conheça quem vai te guiar nessa jornada de transformação profissional.
+            {subtitle}
           </p>
         </div>
 
@@ -83,29 +98,27 @@ export function InstructorSection({
                 De vendedor comum a referência no mercado
               </h3>
               <p className="text-muted-foreground leading-relaxed">
-                Alexandre começou sua jornada em vendas há mais de 7 anos, quando o termo "closer" 
-                ainda nem existia no Brasil. Depois de fechar milhões em vendas para grandes 
-                empresas do digital, decidiu compartilhar seu método com quem quer transformar 
-                sua vida através das vendas.
+                {bio1}
               </p>
               <p className="text-muted-foreground leading-relaxed">
-                Sua metodologia é prática, direta e focada em resultados. Nada de teoria 
-                acadêmica que não funciona no mundo real. Apenas o que realmente faz você 
-                fechar vendas e colocar dinheiro no bolso.
+                {bio2}
               </p>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-4 pt-4">
-              {stats.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-2">
-                    <stat.icon className="w-5 h-5 text-primary" />
+              {stats.map((stat, index) => {
+                const Icon = getIcon(stat.icon);
+                return (
+                  <div key={index} className="text-center">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-2">
+                      <Icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="text-xl font-bold text-foreground">{stat.value}</div>
+                    <div className="text-xs text-muted-foreground">{stat.label}</div>
                   </div>
-                  <div className="text-xl font-bold text-foreground">{stat.value}</div>
-                  <div className="text-xs text-muted-foreground">{stat.label}</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

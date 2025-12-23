@@ -1,21 +1,25 @@
-import { 
-  Sprout, 
-  BookOpen, 
-  Target, 
-  Theater, 
-  Briefcase, 
-  Rocket,
-  ChevronRight,
-  MapPin
-} from 'lucide-react';
+import { ChevronRight, MapPin } from 'lucide-react';
+import { CMSContent, getCMSValue, getCMSJson } from '@/hooks/useCMSContent';
+import { getIcon } from '@/lib/iconMap';
 
-const journeySteps = [
+interface JourneyStep {
+  step: number;
+  title: string;
+  subtitle: string;
+  description: string;
+  icon: string;
+  color: string;
+  isStart?: boolean;
+  isEnd?: boolean;
+}
+
+const defaultJourneySteps: JourneyStep[] = [
   {
     step: 1,
     title: 'Zero',
     subtitle: 'Ponto de partida',
     description: 'Onde você está agora - sem experiência, cheio de dúvidas, mas com vontade de mudar.',
-    icon: Sprout,
+    icon: 'Sprout',
     color: 'from-muted to-muted-foreground/50',
     isStart: true,
   },
@@ -24,7 +28,7 @@ const journeySteps = [
     title: 'Fundamentos',
     subtitle: 'Mentalidade certa',
     description: 'Mindset de vendas, como pensa um closer, psicologia do comprador e do vendedor.',
-    icon: BookOpen,
+    icon: 'BookOpen',
     color: 'from-primary/60 to-primary/80',
   },
   {
@@ -32,7 +36,7 @@ const journeySteps = [
     title: 'Técnicas',
     subtitle: 'Arsenal completo',
     description: 'Scripts de abertura, condução da conversa, quebra de objeções e fechamento.',
-    icon: Target,
+    icon: 'Target',
     color: 'from-primary/80 to-primary',
   },
   {
@@ -40,7 +44,7 @@ const journeySteps = [
     title: 'Prática',
     subtitle: 'Mão na massa',
     description: 'Simulações ao vivo, roleplay com feedback, análise de casos reais do mercado.',
-    icon: Theater,
+    icon: 'Theater',
     color: 'from-primary to-accent/80',
   },
   {
@@ -48,7 +52,7 @@ const journeySteps = [
     title: 'Portfólio',
     subtitle: 'Seu diferencial',
     description: 'Montagem do seu perfil profissional, cases de sucesso e posicionamento no mercado.',
-    icon: Briefcase,
+    icon: 'Briefcase',
     color: 'from-accent/80 to-accent',
   },
   {
@@ -56,13 +60,24 @@ const journeySteps = [
     title: 'Contratado',
     subtitle: 'Meta alcançada',
     description: 'Como se posicionar, passar em entrevistas e ser contratado em startups e empresas.',
-    icon: Rocket,
+    icon: 'Rocket',
     color: 'from-accent to-chart-1',
     isEnd: true,
   },
 ];
 
-export function JourneySection() {
+interface JourneySectionProps {
+  content?: CMSContent[];
+}
+
+export function JourneySection({ content }: JourneySectionProps) {
+  // Get CMS values with fallbacks
+  const badge = getCMSValue(content, 'journey_badge', 'Sua Jornada');
+  const title = getCMSValue(content, 'journey_title', 'O que você vai <span class="text-gradient">aprender</span>');
+  const subtitle = getCMSValue(content, 'journey_subtitle', 'Do zero absoluto ao closer contratado - uma jornada estruturada passo a passo');
+  const bottomText = getCMSValue(content, 'journey_bottom_text', 'Cada módulo foi desenhado para te levar ao próximo nível. <span class="text-primary font-semibold">Sem enrolação, só prática.</span>');
+  const journeySteps = getCMSJson<JourneyStep[]>(content, 'journey_steps', defaultJourneySteps);
+
   return (
     <section className="py-20 px-4 bg-gradient-to-b from-background to-card/30">
       <div className="max-w-6xl mx-auto">
@@ -70,13 +85,14 @@ export function JourneySection() {
         <div className="text-center mb-16 space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
             <MapPin className="w-4 h-4 text-primary" />
-            <span className="text-sm text-primary font-medium">Sua Jornada</span>
+            <span className="text-sm text-primary font-medium">{badge}</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground">
-            O que você vai <span className="text-gradient">aprender</span>
-          </h2>
+          <h2 
+            className="text-3xl md:text-4xl font-display font-bold text-foreground"
+            dangerouslySetInnerHTML={{ __html: title }}
+          />
           <p className="text-muted-foreground max-w-2xl mx-auto text-sm md:text-base">
-            Do zero absoluto ao closer contratado - uma jornada estruturada passo a passo
+            {subtitle}
           </p>
         </div>
 
@@ -88,7 +104,7 @@ export function JourneySection() {
           {/* Steps */}
           <div className="grid grid-cols-6 gap-4">
             {journeySteps.map((step, index) => {
-              const Icon = step.icon;
+              const Icon = getIcon(step.icon);
               return (
                 <div key={step.step} className="relative flex flex-col items-center group">
                   {/* Step Number & Icon */}
@@ -140,7 +156,7 @@ export function JourneySection() {
           {/* Steps */}
           <div className="space-y-8">
             {journeySteps.map((step) => {
-              const Icon = step.icon;
+              const Icon = getIcon(step.icon);
               return (
                 <div key={step.step} className="relative flex items-start gap-5 pl-2">
                   {/* Step Icon */}
@@ -181,10 +197,10 @@ export function JourneySection() {
 
         {/* Bottom CTA hint */}
         <div className="mt-16 text-center">
-          <p className="text-muted-foreground text-sm">
-            Cada módulo foi desenhado para te levar ao próximo nível.{' '}
-            <span className="text-primary font-semibold">Sem enrolação, só prática.</span>
-          </p>
+          <p 
+            className="text-muted-foreground text-sm"
+            dangerouslySetInnerHTML={{ __html: bottomText }}
+          />
         </div>
       </div>
     </section>
