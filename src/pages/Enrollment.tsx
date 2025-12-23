@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Check, CreditCard, User, KeyRound, Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Check, CreditCard, User, KeyRound, Loader2, ArrowLeft, ArrowRight, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -32,6 +32,8 @@ export default function Enrollment() {
   const [isLoading, setIsLoading] = useState(false);
   const [leadData, setLeadData] = useState<LeadData | null>(null);
   const [course, setCourse] = useState<CourseData | null>(null);
+  const [courseLoading, setCourseLoading] = useState(true);
+  const [courseError, setCourseError] = useState<string | null>(null);
   const [cpf, setCpf] = useState('');
   const [temporaryPassword, setTemporaryPassword] = useState('');
 
@@ -49,15 +51,34 @@ export default function Enrollment() {
 
     // Fetch course info
     const fetchCourse = async () => {
-      const { data } = await supabase
-        .from('courses')
-        .select('id, title, price_cents, max_installments')
-        .eq('is_active', true)
-        .limit(1)
-        .single();
+      setCourseLoading(true);
+      setCourseError(null);
       
-      if (data) {
+      try {
+        const { data, error } = await supabase
+          .from('courses')
+          .select('id, title, price_cents, max_installments')
+          .eq('is_active', true)
+          .limit(1)
+          .maybeSingle();
+        
+        if (error) {
+          console.error('Error fetching course:', error);
+          setCourseError('Erro ao carregar informações do curso.');
+          return;
+        }
+        
+        if (!data) {
+          setCourseError('Nenhum curso disponível no momento.');
+          return;
+        }
+        
         setCourse(data);
+      } catch (err) {
+        console.error('Unexpected error:', err);
+        setCourseError('Erro inesperado. Tente novamente.');
+      } finally {
+        setCourseLoading(false);
       }
     };
 
@@ -131,10 +152,45 @@ export default function Enrollment() {
     navigate('/aluno');
   };
 
-  if (!leadData || !course) {
+  // Loading state
+  if (!leadData || courseLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Error state - no course available
+  if (courseError || !course) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="text-center max-w-md space-y-6">
+          <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+            <AlertCircle className="w-8 h-8 text-destructive" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-display font-bold text-foreground">
+              Matrícula Indisponível
+            </h1>
+            <p className="text-muted-foreground">
+              {courseError || 'Nenhum curso disponível no momento.'}
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button variant="outline" asChild>
+              <Link to="/">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Voltar ao início
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link to="/contato">
+                Falar com suporte
+              </Link>
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
