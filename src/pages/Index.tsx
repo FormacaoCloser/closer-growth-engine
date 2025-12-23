@@ -6,6 +6,7 @@ import { ObjectionsSection } from '@/components/landing/ObjectionsSection';
 import { InstructorSection } from '@/components/landing/InstructorSection';
 import { CTASection } from '@/components/landing/CTASection';
 import { MiniCTASection } from '@/components/landing/MiniCTASection';
+import { JourneySection } from '@/components/landing/JourneySection';
 import { LeadCaptureModal } from '@/components/landing/LeadCaptureModal';
 import { Footer } from '@/components/landing/Footer';
 import { useVideoProgress } from '@/hooks/useVideoProgress';
@@ -60,6 +61,8 @@ export default function Index() {
         <ObjectionsSection />
         <MiniCTASection onCTAClick={handleCTAClick} />
         <InstructorSection />
+        <CTASection onCTAClick={handleCTAClick} />
+        <JourneySection />
         <CTASection onCTAClick={handleCTAClick} />
         <Footer />
       </div>

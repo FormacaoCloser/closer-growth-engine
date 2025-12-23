@@ -1,4 +1,20 @@
-import { MessageCircleQuestion, Target, User, Phone, Users, Wallet, Clock, ChevronDown } from 'lucide-react';
+import { 
+  MessageCircleQuestion, 
+  Target, 
+  User, 
+  Phone, 
+  Users, 
+  Wallet, 
+  Clock, 
+  Mic, 
+  RefreshCw, 
+  Globe, 
+  Shield, 
+  FileText, 
+  Calendar, 
+  TrendingUp, 
+  Video 
+} from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
@@ -42,6 +58,54 @@ const objections = [
     answer: 'Closers dedicados começam a fechar vendas em poucas semanas. O tempo exato depende do seu comprometimento, mas não estamos falando de anos.',
     icon: Clock,
     highlight: 'poucas semanas',
+  },
+  {
+    question: 'Não tenho boa dicção ou comunicação',
+    answer: 'Comunicação é técnica, não dom. Você vai aprender exatamente o que falar e como falar. Scripts prontos te guiam no começo até você ganhar confiança.',
+    icon: Mic,
+    highlight: 'técnica',
+  },
+  {
+    question: 'Já tentei vender antes e não funcionou',
+    answer: 'Provavelmente você usou o método errado. Vender como closer é diferente - você conduz a conversa com estrutura e psicologia de vendas.',
+    icon: RefreshCw,
+    highlight: 'método errado',
+  },
+  {
+    question: 'Isso funciona mesmo no Brasil?',
+    answer: 'O mercado de high ticket no Brasil está em explosão. Empresas brasileiras estão desesperadas por closers qualificados. A demanda supera a oferta.',
+    icon: Globe,
+    highlight: 'explosão',
+  },
+  {
+    question: 'E se a empresa não me pagar a comissão?',
+    answer: 'Você aprende a se proteger com contrato, termos claros e como escolher empresas sérias. Calote existe, mas é evitável com as práticas certas.',
+    icon: Shield,
+    highlight: 'contrato',
+  },
+  {
+    question: 'Preciso ter CNPJ ou ser MEI?',
+    answer: 'Não para começar! Muitos closers recebem como pessoa física via Pix. Quando escalar, aí sim vale abrir MEI para organizar melhor.',
+    icon: FileText,
+    highlight: 'pessoa física',
+  },
+  {
+    question: 'Consigo fazer isso sem largar meu emprego?',
+    answer: 'Totalmente! Muitos closers trabalham em horários flexíveis - noite, fins de semana. Você monta sua própria agenda conforme sua disponibilidade.',
+    icon: Calendar,
+    highlight: 'horários flexíveis',
+  },
+  {
+    question: 'Quanto um closer ganha realisticamente?',
+    answer: 'Varia muito: iniciantes faturam R$ 3k a R$ 8k/mês. Intermediários R$ 10k a R$ 20k. Tops passam de R$ 30k. Depende do seu esforço e nicho escolhido.',
+    icon: TrendingUp,
+    highlight: 'R$ 3k a R$ 8k',
+  },
+  {
+    question: 'Vou precisar aparecer ou gravar vídeos?',
+    answer: 'Não! Closer trabalha nos bastidores. Seu trabalho é por ligação, call ou WhatsApp. Zero exposição pública necessária.',
+    icon: Video,
+    highlight: 'nos bastidores',
   },
 ];
 
