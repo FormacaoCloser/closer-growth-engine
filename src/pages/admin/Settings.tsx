@@ -1,20 +1,62 @@
+import { useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Card, CardContent } from "@/components/ui/card";
-import { Settings } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Building2, CreditCard, Mail, Users, Shield } from "lucide-react";
+import { GeneralSettingsTab } from "@/components/admin/settings/GeneralSettingsTab";
+import { PaymentSettingsTab } from "@/components/admin/settings/PaymentSettingsTab";
+import { EmailSettingsTab } from "@/components/admin/settings/EmailSettingsTab";
+import { AffiliateSettingsTab } from "@/components/admin/settings/AffiliateSettingsTab";
+import { SecuritySettingsTab } from "@/components/admin/settings/SecuritySettingsTab";
 
 export default function AdminSettings() {
+  const [activeTab, setActiveTab] = useState("general");
+
   return (
     <AdminLayout title="Configurações" description="Configure seu sistema">
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-          <Settings className="h-16 w-16 text-muted-foreground/30 mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Em breve</h3>
-          <p className="text-muted-foreground max-w-md">
-            Aqui você poderá configurar integrações (Stripe, emails, analytics),
-            personalizar o domínio e ajustar preferências do sistema.
-          </p>
-        </CardContent>
-      </Card>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-flex">
+          <TabsTrigger value="general" className="gap-2">
+            <Building2 className="h-4 w-4 hidden sm:inline" />
+            <span>Geral</span>
+          </TabsTrigger>
+          <TabsTrigger value="payment" className="gap-2">
+            <CreditCard className="h-4 w-4 hidden sm:inline" />
+            <span>Pagamentos</span>
+          </TabsTrigger>
+          <TabsTrigger value="email" className="gap-2">
+            <Mail className="h-4 w-4 hidden sm:inline" />
+            <span>Emails</span>
+          </TabsTrigger>
+          <TabsTrigger value="affiliate" className="gap-2">
+            <Users className="h-4 w-4 hidden sm:inline" />
+            <span>Afiliados</span>
+          </TabsTrigger>
+          <TabsTrigger value="security" className="gap-2">
+            <Shield className="h-4 w-4 hidden sm:inline" />
+            <span>Segurança</span>
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="general">
+          <GeneralSettingsTab />
+        </TabsContent>
+
+        <TabsContent value="payment">
+          <PaymentSettingsTab />
+        </TabsContent>
+
+        <TabsContent value="email">
+          <EmailSettingsTab />
+        </TabsContent>
+
+        <TabsContent value="affiliate">
+          <AffiliateSettingsTab />
+        </TabsContent>
+
+        <TabsContent value="security">
+          <SecuritySettingsTab />
+        </TabsContent>
+      </Tabs>
     </AdminLayout>
   );
 }
