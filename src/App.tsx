@@ -19,6 +19,12 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminCourses from "./pages/admin/Courses";
 import AdminModules from "./pages/admin/Modules";
 import AdminLessons from "./pages/admin/Lessons";
+import AdminStudents from "./pages/admin/Students";
+import AdminCMS from "./pages/admin/CMS";
+import AdminSales from "./pages/admin/Sales";
+import AdminAffiliates from "./pages/admin/Affiliates";
+import AdminUsers from "./pages/admin/Users";
+import AdminSettings from "./pages/admin/Settings";
 
 const queryClient = new QueryClient();
 
@@ -86,6 +92,54 @@ const App = () => (
               element={
                 <ProtectedRoute requireAdmin>
                   <AdminLessons />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/alunos"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminStudents />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/cms"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminCMS />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/vendas"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminSales />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/afiliados"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminAffiliates />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/usuarios"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminUsers />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/config"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminSettings />
                 </ProtectedRoute>
               }
             />
