@@ -45,8 +45,8 @@ export function HeroSection({
 
         {/* Subtitle */}
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-          Trabalhe de casa, cerca de 4 horas por dia, em um mercado em explosão 
-          que as universidades ainda não ensinam.
+          Uma carreira em vendas com salário fixo + comissões atrativas. 
+          Startups e empresas de todo o Brasil estão contratando.
         </p>
 
         {/* Video Player */}
