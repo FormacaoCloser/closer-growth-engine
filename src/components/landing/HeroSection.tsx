@@ -74,16 +74,6 @@ export function HeroSection({
           </p>
         </div>
 
-        {/* Scroll Indicator - only shows when unlocked */}
-        {hasUnlocked && (
-          <button
-            onClick={onScrollToContent}
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground hover:text-foreground transition-colors animate-fade-in"
-          >
-            <span className="text-sm">Ver mais</span>
-            <ArrowDown className="w-5 h-5 animate-bounce" />
-          </button>
-        )}
       </div>
     </section>
   );
