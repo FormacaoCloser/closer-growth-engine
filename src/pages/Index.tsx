@@ -27,6 +27,7 @@ export default function Index() {
   };
 
   const handleCTAClick = () => {
+    console.log('CTA clicked - opening modal, current state:', isModalOpen);
     setIsModalOpen(true);
   };
 
