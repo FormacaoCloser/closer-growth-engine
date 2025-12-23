@@ -1,8 +1,9 @@
 import { SmartVideoPlayer } from './SmartVideoPlayer';
 import { Button } from '@/components/ui/button';
-import { ArrowDown } from 'lucide-react';
+import { CMSContent, getCMSValue } from '@/hooks/useCMSContent';
 
 interface HeroSectionProps {
+  content?: CMSContent[];
   displayProgress: number;
   isPlaying: boolean;
   hasUnlocked: boolean;
@@ -13,6 +14,7 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({
+  content,
   displayProgress,
   isPlaying,
   hasUnlocked,
@@ -21,6 +23,14 @@ export function HeroSection({
   onScrollToContent,
   onCTAClick,
 }: HeroSectionProps) {
+  // Get CMS values with fallbacks
+  const badge = getCMSValue(content, 'hero_badge', 'Nova Profissão em Alta');
+  const title = getCMSValue(content, 'hero_title', 'Descubra a Profissão que Paga de <span class="text-gradient">R$10 a R$30 Mil</span> por Mês');
+  const subtitle = getCMSValue(content, 'hero_subtitle', 'Uma carreira em vendas com salário fixo + comissões atrativas. Startups e empresas de todo o Brasil estão contratando.');
+  const videoUrl = getCMSValue(content, 'hero_video_url', 'https://formacaocloser.b-cdn.net/copy_64B2EF33-32DD-4816-8FD5-D93AEEABCB23.mp4');
+  const ctaButton = getCMSValue(content, 'hero_cta_button', 'Matricule-se Agora');
+  const ctaSubtext = getCMSValue(content, 'hero_cta_subtext', 'Acesso imediato • Garantia de 7 dias');
+
   return (
     <section className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative">
       {/* Background Effects */}
@@ -33,26 +43,24 @@ export function HeroSection({
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
           <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          <span className="text-sm text-primary font-medium">Nova Profissão em Alta</span>
+          <span className="text-sm text-primary font-medium">{badge}</span>
         </div>
 
         {/* Title */}
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight">
-          Descubra a Profissão que Paga de{' '}
-          <span className="text-gradient">R$10 a R$30 Mil</span>{' '}
-          por Mês
-        </h1>
+        <h1 
+          className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight"
+          dangerouslySetInnerHTML={{ __html: title }}
+        />
 
         {/* Subtitle */}
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-          Uma carreira em vendas com salário fixo + comissões atrativas. 
-          Startups e empresas de todo o Brasil estão contratando.
+          {subtitle}
         </p>
 
         {/* Video Player */}
         <div className="w-full max-w-3xl mx-auto mt-8">
           <SmartVideoPlayer
-            videoUrl="https://formacaocloser.b-cdn.net/copy_64B2EF33-32DD-4816-8FD5-D93AEEABCB23.mp4"
+            videoUrl={videoUrl}
             displayProgress={displayProgress}
             isPlaying={isPlaying}
             onPlayPause={onPlayPause}
@@ -67,10 +75,10 @@ export function HeroSection({
             className="btn-cta text-lg px-8 py-6"
             onClick={onCTAClick}
           >
-            Matricule-se Agora
+            {ctaButton}
           </Button>
           <p className="text-sm text-muted-foreground mt-3">
-            Acesso imediato • Garantia de 7 dias
+            {ctaSubtext}
           </p>
         </div>
 

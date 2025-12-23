@@ -10,10 +10,14 @@ import { JourneySection } from '@/components/landing/JourneySection';
 import { LeadCaptureModal } from '@/components/landing/LeadCaptureModal';
 import { Footer } from '@/components/landing/Footer';
 import { useVideoProgress } from '@/hooks/useVideoProgress';
+import { useCMSContent } from '@/hooks/useCMSContent';
 
 export default function Index() {
   const contentRef = useRef<HTMLDivElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Fetch all CMS content for landing page
+  const { data: cmsContent } = useCMSContent('landing');
 
   const {
     displayProgress,
@@ -38,6 +42,7 @@ export default function Index() {
 
       {/* Hero with VSL - Always visible */}
       <HeroSection
+        content={cmsContent}
         displayProgress={displayProgress}
         isPlaying={isPlaying}
         hasUnlocked={hasUnlocked}
@@ -56,14 +61,14 @@ export default function Index() {
             : 'opacity-0 translate-y-10 pointer-events-none h-0 overflow-hidden'
         }`}
       >
-        <BenefitsSection />
-        <CTASection onCTAClick={handleCTAClick} />
-        <ObjectionsSection />
+        <BenefitsSection content={cmsContent} />
+        <CTASection content={cmsContent} onCTAClick={handleCTAClick} />
+        <ObjectionsSection content={cmsContent} />
         <MiniCTASection onCTAClick={handleCTAClick} />
-        <InstructorSection />
-        <CTASection onCTAClick={handleCTAClick} />
-        <JourneySection />
-        <CTASection onCTAClick={handleCTAClick} />
+        <InstructorSection content={cmsContent} />
+        <CTASection content={cmsContent} onCTAClick={handleCTAClick} />
+        <JourneySection content={cmsContent} />
+        <CTASection content={cmsContent} onCTAClick={handleCTAClick} />
         <Footer />
       </div>
 
