@@ -25,11 +25,21 @@ export function HeroSection({
 }: HeroSectionProps) {
   // Get CMS values with fallbacks
   const badge = getCMSValue(content, 'hero_badge', 'Nova Profissão em Alta');
-  const title = getCMSValue(content, 'hero_title', 'Descubra a Profissão que Paga de <span class="text-gradient">R$10 a R$30 Mil</span> por Mês');
+  const titlePrefix = getCMSValue(content, 'hero_title_prefix', 'Descubra a Profissão que Paga de');
+  const titleHighlight = getCMSValue(content, 'hero_title_highlight', 'R$10 a R$30 Mil');
+  const titleSuffix = getCMSValue(content, 'hero_title_suffix', 'por Mês');
+  const titleHighlightColor = getCMSValue(content, 'hero_title_highlight_color', 'gradient');
   const subtitle = getCMSValue(content, 'hero_subtitle', 'Uma carreira em vendas com salário fixo + comissões atrativas. Startups e empresas de todo o Brasil estão contratando.');
   const videoUrl = getCMSValue(content, 'hero_video_url', 'https://formacaocloser.b-cdn.net/copy_64B2EF33-32DD-4816-8FD5-D93AEEABCB23.mp4');
   const ctaButton = getCMSValue(content, 'hero_cta_button', 'Matricule-se Agora');
   const ctaSubtext = getCMSValue(content, 'hero_cta_subtext', 'Acesso imediato • Garantia de 7 dias');
+
+  // Map highlight color to CSS class
+  const highlightClass = titleHighlightColor === 'accent' 
+    ? 'text-accent' 
+    : titleHighlightColor === 'primary'
+    ? 'text-primary'
+    : 'text-gradient';
 
   return (
     <section className="min-h-screen flex flex-col items-center justify-center px-4 pt-24 pb-8 relative">
@@ -47,10 +57,11 @@ export function HeroSection({
         </div>
 
         {/* Title */}
-        <h1 
-          className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight"
-          dangerouslySetInnerHTML={{ __html: title }}
-        />
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight">
+          {titlePrefix}{' '}
+          <span className={highlightClass}>{titleHighlight}</span>{' '}
+          {titleSuffix}
+        </h1>
 
         {/* Subtitle */}
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">

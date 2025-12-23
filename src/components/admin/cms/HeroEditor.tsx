@@ -14,7 +14,10 @@ interface HeroEditorProps {
 
 export function HeroEditor({ content, isLoading }: HeroEditorProps) {
   const [badge, setBadge] = useState('');
-  const [title, setTitle] = useState('');
+  const [titlePrefix, setTitlePrefix] = useState('');
+  const [titleHighlight, setTitleHighlight] = useState('');
+  const [titleSuffix, setTitleSuffix] = useState('');
+  const [titleHighlightColor, setTitleHighlightColor] = useState('gradient');
   const [subtitle, setSubtitle] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
   const [ctaText, setCtaText] = useState('');
@@ -25,7 +28,10 @@ export function HeroEditor({ content, isLoading }: HeroEditorProps) {
   useEffect(() => {
     if (content) {
       setBadge(getCMSValue(content, 'hero_badge', 'Nova Profissão em Alta'));
-      setTitle(getCMSValue(content, 'hero_title', 'Descubra a Profissão que Paga de R$10 a R$30 Mil por Mês'));
+      setTitlePrefix(getCMSValue(content, 'hero_title_prefix', 'Descubra a Profissão que Paga de'));
+      setTitleHighlight(getCMSValue(content, 'hero_title_highlight', 'R$10 a R$30 Mil'));
+      setTitleSuffix(getCMSValue(content, 'hero_title_suffix', 'por Mês'));
+      setTitleHighlightColor(getCMSValue(content, 'hero_title_highlight_color', 'gradient'));
       setSubtitle(getCMSValue(content, 'hero_subtitle', ''));
       setVideoUrl(getCMSValue(content, 'hero_video_url', ''));
       setCtaText(getCMSValue(content, 'hero_cta_text', 'Matricule-se Agora'));
@@ -38,13 +44,25 @@ export function HeroEditor({ content, isLoading }: HeroEditorProps) {
       pageSlug: 'landing',
       items: [
         { contentKey: 'hero_badge', contentValue: badge },
-        { contentKey: 'hero_title', contentValue: title },
+        { contentKey: 'hero_title_prefix', contentValue: titlePrefix },
+        { contentKey: 'hero_title_highlight', contentValue: titleHighlight },
+        { contentKey: 'hero_title_suffix', contentValue: titleSuffix },
+        { contentKey: 'hero_title_highlight_color', contentValue: titleHighlightColor },
         { contentKey: 'hero_subtitle', contentValue: subtitle },
         { contentKey: 'hero_video_url', contentValue: videoUrl, contentType: 'video' },
         { contentKey: 'hero_cta_text', contentValue: ctaText },
         { contentKey: 'hero_cta_subtext', contentValue: ctaSubtext },
       ],
     });
+  };
+
+  // Get highlight class for preview
+  const getHighlightClass = () => {
+    switch (titleHighlightColor) {
+      case 'accent': return 'text-amber-500';
+      case 'primary': return 'text-primary';
+      default: return 'bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent';
+    }
   };
 
   if (isLoading) {
@@ -72,18 +90,87 @@ export function HeroEditor({ content, isLoading }: HeroEditorProps) {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="title">Título Principal</Label>
-            <Textarea
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Título principal da página"
-              rows={2}
-            />
-            <p className="text-xs text-muted-foreground">
-              Dica: Use R$10 a R$30 Mil para destacar os valores
-            </p>
+          <div className="space-y-4">
+            <Label>Título Principal (3 partes)</Label>
+            
+            <div className="space-y-2">
+              <Label htmlFor="titlePrefix" className="text-sm font-normal text-muted-foreground">Texto antes do destaque</Label>
+              <Input
+                id="titlePrefix"
+                value={titlePrefix}
+                onChange={(e) => setTitlePrefix(e.target.value)}
+                placeholder="Descubra a Profissão que Paga de"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="titleHighlight" className="text-sm font-normal text-muted-foreground">Texto em destaque (colorido)</Label>
+              <Input
+                id="titleHighlight"
+                value={titleHighlight}
+                onChange={(e) => setTitleHighlight(e.target.value)}
+                placeholder="R$10 a R$30 Mil"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="titleSuffix" className="text-sm font-normal text-muted-foreground">Texto depois do destaque</Label>
+              <Input
+                id="titleSuffix"
+                value={titleSuffix}
+                onChange={(e) => setTitleSuffix(e.target.value)}
+                placeholder="por Mês"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-normal text-muted-foreground">Cor do destaque</Label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="highlightColor"
+                    value="gradient"
+                    checked={titleHighlightColor === 'gradient'}
+                    onChange={() => setTitleHighlightColor('gradient')}
+                    className="accent-primary"
+                  />
+                  <span className="bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent font-semibold">Verde (Gradiente)</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="highlightColor"
+                    value="accent"
+                    checked={titleHighlightColor === 'accent'}
+                    onChange={() => setTitleHighlightColor('accent')}
+                    className="accent-primary"
+                  />
+                  <span className="text-amber-500 font-semibold">Dourado</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="highlightColor"
+                    value="primary"
+                    checked={titleHighlightColor === 'primary'}
+                    onChange={() => setTitleHighlightColor('primary')}
+                    className="accent-primary"
+                  />
+                  <span className="text-primary font-semibold">Primário</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Preview */}
+            <div className="p-4 bg-muted/50 rounded-lg border">
+              <p className="text-xs text-muted-foreground mb-2">Preview:</p>
+              <p className="text-lg font-bold">
+                {titlePrefix}{' '}
+                <span className={getHighlightClass()}>{titleHighlight}</span>{' '}
+                {titleSuffix}
+              </p>
+            </div>
           </div>
 
           <div className="space-y-2">
