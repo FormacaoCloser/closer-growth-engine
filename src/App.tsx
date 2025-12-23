@@ -16,6 +16,9 @@ import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import StudentDashboard from "./pages/student/Dashboard";
 import AdminDashboard from "./pages/admin/Dashboard";
+import AdminCourses from "./pages/admin/Courses";
+import AdminModules from "./pages/admin/Modules";
+import AdminLessons from "./pages/admin/Lessons";
 
 const queryClient = new QueryClient();
 
@@ -63,10 +66,26 @@ const App = () => (
               }
             />
             <Route
-              path="/admin/*"
+              path="/admin/cursos"
               element={
                 <ProtectedRoute requireAdmin>
-                  <AdminDashboard />
+                  <AdminCourses />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/cursos/:courseId/modulos"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminModules />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/cursos/:courseId/modulos/:moduleId/aulas"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminLessons />
                 </ProtectedRoute>
               }
             />
