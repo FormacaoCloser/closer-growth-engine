@@ -26,8 +26,9 @@ export function InstructorSection({ content }: InstructorSectionProps) {
   // Get CMS values with fallbacks
   const title = getCMSValue(content, 'instructor_title', 'Quem é <span class="text-gradient">Alexandre Closer</span>?');
   const subtitle = getCMSValue(content, 'instructor_subtitle', 'Conheça quem vai te guiar nessa jornada de transformação profissional.');
-  const bio1 = getCMSValue(content, 'instructor_bio1', 'Alexandre começou sua jornada em vendas há mais de 7 anos, quando o termo "closer" ainda nem existia no Brasil. Depois de fechar milhões em vendas para grandes empresas do digital, decidiu compartilhar seu método com quem quer transformar sua vida através das vendas.');
-  const bio2 = getCMSValue(content, 'instructor_bio2', 'Sua metodologia é prática, direta e focada em resultados. Nada de teoria acadêmica que não funciona no mundo real. Apenas o que realmente faz você fechar vendas e colocar dinheiro no bolso.');
+  const bioTitle = getCMSValue(content, 'instructor_bio_title', 'De vendedor comum a referência no mercado');
+  const bio1 = getCMSValue(content, 'instructor_bio_text1', 'Alexandre começou sua jornada em vendas há mais de 7 anos, quando o termo "closer" ainda nem existia no Brasil. Depois de fechar milhões em vendas para grandes empresas do digital, decidiu compartilhar seu método com quem quer transformar sua vida através das vendas.');
+  const bio2 = getCMSValue(content, 'instructor_bio_text2', 'Sua metodologia é prática, direta e focada em resultados. Nada de teoria acadêmica que não funciona no mundo real. Apenas o que realmente faz você fechar vendas e colocar dinheiro no bolso.');
   const videoUrl = getCMSValue(content, 'instructor_video_url', '');
   const stats = getCMSJson<StatItem[]>(content, 'instructor_stats', defaultStats);
 
@@ -95,7 +96,7 @@ export function InstructorSection({ content }: InstructorSectionProps) {
           <div className="space-y-6">
             <div className="space-y-4">
               <h3 className="text-2xl font-display font-bold text-foreground">
-                De vendedor comum a referência no mercado
+                {bioTitle}
               </h3>
               <p className="text-muted-foreground leading-relaxed">
                 {bio1}
