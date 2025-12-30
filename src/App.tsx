@@ -60,10 +60,50 @@ const App = () => (
               }
             />
             <Route
-              path="/aluno/*"
+              path="/aluno/cursos"
               element={
                 <ProtectedRoute>
-                  <StudentDashboard />
+                  <StudentCourses />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/aluno/curso/:slug"
+              element={
+                <ProtectedRoute>
+                  <StudentCourseView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/aluno/aula/:lessonId"
+              element={
+                <ProtectedRoute>
+                  <StudentLessonView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/aluno/certificados"
+              element={
+                <ProtectedRoute>
+                  <StudentCertificates />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/aluno/certificado/:certificateId"
+              element={
+                <ProtectedRoute>
+                  <StudentCertificateDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/aluno/suporte"
+              element={
+                <ProtectedRoute>
+                  <StudentSupport />
                 </ProtectedRoute>
               }
             />
