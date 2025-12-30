@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Check, CreditCard, User, KeyRound, Loader2, ArrowLeft, ArrowRight, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { CheckoutModal } from '@/components/checkout/CheckoutModal';
 
 interface LeadData {
   name: string;
@@ -36,6 +37,7 @@ export default function Enrollment() {
   const [courseError, setCourseError] = useState<string | null>(null);
   const [cpf, setCpf] = useState('');
   const [temporaryPassword, setTemporaryPassword] = useState('');
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
 
   useEffect(() => {
     // Get lead data from sessionStorage
@@ -112,40 +114,16 @@ export default function Enrollment() {
     setCurrentStep(2);
   };
 
-  const handlePayment = async () => {
+  const handlePayment = () => {
     if (!leadData || !course) return;
-    
-    setIsLoading(true);
-    
-    try {
-      // Call create-checkout edge function
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: {
-          name: leadData.name,
-          email: leadData.email,
-          phone: leadData.phone,
-          course_id: course.id,
-        },
-      });
+    setIsCheckoutModalOpen(true);
+  };
 
-      if (error) {
-        console.error('Checkout error:', error);
-        toast.error('Erro ao iniciar pagamento. Tente novamente.');
-        return;
-      }
-
-      if (data?.url) {
-        // Redirect to Stripe Checkout
-        window.location.href = data.url;
-      } else {
-        toast.error('Erro ao criar sessão de pagamento.');
-      }
-    } catch (error) {
-      console.error('Payment error:', error);
-      toast.error('Erro no pagamento. Tente novamente.');
-    } finally {
-      setIsLoading(false);
-    }
+  const handlePaymentSuccess = () => {
+    setIsCheckoutModalOpen(false);
+    setCurrentStep(3);
+    // Generate temporary password for display
+    setTemporaryPassword(Math.random().toString(36).slice(-8));
   };
 
   const handleAccessCourse = () => {
@@ -361,30 +339,31 @@ export default function Enrollment() {
               </div>
             </div>
 
-            {/* Payment Button (Stripe integration placeholder) */}
+            {/* Payment Button */}
             <div className="space-y-4">
               <Button 
                 onClick={handlePayment}
                 className="w-full btn-cta py-6 text-lg"
-                disabled={isLoading}
               >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Processando pagamento...
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="w-5 h-5 mr-2" />
-                    Pagar {formatCurrency(course.price_cents)}
-                  </>
-                )}
+                <CreditCard className="w-5 h-5 mr-2" />
+                Escolher forma de pagamento
               </Button>
               
               <p className="text-xs text-center text-muted-foreground">
                 Pagamento 100% seguro. Seus dados estão protegidos.
               </p>
             </div>
+
+            {/* Checkout Modal */}
+            {leadData && course && (
+              <CheckoutModal
+                isOpen={isCheckoutModalOpen}
+                onClose={() => setIsCheckoutModalOpen(false)}
+                onSuccess={handlePaymentSuccess}
+                leadData={leadData}
+                courseData={course}
+              />
+            )}
           </div>
         )}
 
