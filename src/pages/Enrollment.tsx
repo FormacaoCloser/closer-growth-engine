@@ -113,31 +113,33 @@ export default function Enrollment() {
   };
 
   const handlePayment = async () => {
+    if (!leadData || !course) return;
+    
     setIsLoading(true);
     
     try {
-      // TODO: Integrate with Stripe here
-      // For now, simulate payment success
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Call create-checkout edge function
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: {
+          name: leadData.name,
+          email: leadData.email,
+          phone: leadData.phone,
+          course_id: course.id,
+        },
+      });
 
-      // Generate temporary password
-      const tempPassword = Math.random().toString(36).slice(-8) + 'A1!';
-      setTemporaryPassword(tempPassword);
-
-      // Update abandoned cart as recovered
-      if (leadData?.email && course?.id) {
-        await supabase
-          .from('abandoned_carts')
-          .update({ 
-            recovered: true,
-            checkout_step: 'payment_completed' 
-          })
-          .eq('email', leadData.email)
-          .eq('course_id', course.id);
+      if (error) {
+        console.error('Checkout error:', error);
+        toast.error('Erro ao iniciar pagamento. Tente novamente.');
+        return;
       }
 
-      toast.success('Pagamento confirmado!');
-      setCurrentStep(3);
+      if (data?.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
+      } else {
+        toast.error('Erro ao criar sessão de pagamento.');
+      }
     } catch (error) {
       console.error('Payment error:', error);
       toast.error('Erro no pagamento. Tente novamente.');
