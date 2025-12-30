@@ -39,8 +39,8 @@ export function CheckoutModal({ isOpen, onClose, onSuccess, leadData, courseData
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [boletoUrl, setBoletoUrl] = useState<string | null>(null);
 
-  // PIX key from env (for now, we'll use a placeholder - admin can set via settings)
-  const pixKey = import.meta.env.VITE_PIX_KEY || 'chave-pix@exemplo.com';
+  // PIX key from env
+  const pixKey = import.meta.env.VITE_PIX_KEY || '';
 
   const formatCurrency = (cents: number) => {
     return new Intl.NumberFormat('pt-BR', {
