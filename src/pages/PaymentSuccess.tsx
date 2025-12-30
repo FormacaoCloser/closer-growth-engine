@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Check, Mail, ArrowRight, Loader2, Clock, FileText } from 'lucide-react';
+import { Check, Mail, ArrowRight, Loader2, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
-type PaymentStatus = 'loading' | 'paid' | 'pending_pix' | 'pending_boleto' | 'error';
+type PaymentStatus = 'loading' | 'paid' | 'pending_boleto' | 'error';
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
@@ -58,36 +58,6 @@ export default function PaymentSuccess() {
     );
   }
 
-  if (status === 'pending_pix') {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center space-y-8 animate-fade-in">
-          <div className="w-24 h-24 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto">
-            <Clock className="w-12 h-12 text-amber-500" />
-          </div>
-
-          <div className="space-y-3">
-            <h1 className="text-3xl font-display font-bold text-foreground">
-              Aguardando pagamento Pix
-            </h1>
-            <p className="text-muted-foreground">
-              Complete o pagamento usando o código Pix. Assim que confirmado, você receberá acesso imediato.
-            </p>
-          </div>
-
-          <div className="bg-card rounded-2xl p-6 border border-border/50 space-y-4">
-            <p className="text-sm text-muted-foreground">
-              O Pix é confirmado instantaneamente. Se você já pagou, aguarde alguns segundos e atualize a página.
-            </p>
-          </div>
-
-          <Button asChild variant="outline" className="w-full">
-            <Link to="/">Voltar ao início</Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   if (status === 'pending_boleto') {
     return (

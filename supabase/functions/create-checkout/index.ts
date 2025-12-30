@@ -88,7 +88,7 @@ serve(async (req) => {
         },
       ],
       mode: "payment",
-      payment_method_types: ["card", "pix", "boleto"],
+      payment_method_types: ["card", "boleto"],
       payment_method_options: {
         card: {
           installments: {
