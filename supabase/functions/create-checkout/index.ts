@@ -78,16 +78,28 @@ serve(async (req) => {
     // Get the origin for redirect URLs
     const origin = req.headers.get("origin") || "https://kpxdglccqxkudlasexki.lovableproject.com";
 
-    // Create checkout session
+    // Create checkout session with Pix, Boleto and card installments
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [
         {
-          price: "price_1SjsHVR9LilCIYmYLSrBdl2p", // R$ 1.497,00
+          price: "price_1SjsfvR9LilCIYmYGGTYspCM", // R$ 197,00
           quantity: 1,
         },
       ],
       mode: "payment",
+      payment_method_types: ["card", "pix", "boleto"],
+      payment_method_options: {
+        card: {
+          installments: {
+            enabled: true,
+          },
+        },
+        boleto: {
+          expires_after_days: 3,
+        },
+      },
+      locale: "pt-BR",
       success_url: `${origin}/pagamento-sucesso?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/pagamento-cancelado`,
       metadata: {
