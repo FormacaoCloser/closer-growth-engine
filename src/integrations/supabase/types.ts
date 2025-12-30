@@ -135,6 +135,33 @@ export type Database = {
         }
         Relationships: []
       }
+      certificates: {
+        Row: {
+          certificate_code: string
+          course_id: string
+          created_at: string | null
+          id: string
+          issued_at: string | null
+          user_id: string
+        }
+        Insert: {
+          certificate_code: string
+          course_id: string
+          created_at?: string | null
+          id?: string
+          issued_at?: string | null
+          user_id: string
+        }
+        Update: {
+          certificate_code?: string
+          course_id?: string
+          created_at?: string | null
+          id?: string
+          issued_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       cms_content: {
         Row: {
           content_key: string
@@ -630,6 +657,7 @@ export type Database = {
     }
     Functions: {
       generate_affiliate_code: { Args: never; Returns: string }
+      generate_certificate_code: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
