@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Copy, Check, QrCode, AlertCircle } from 'lucide-react';
+import { Loader2, Copy, Check, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import pixQrCode from '@/assets/pix-qrcode.png';
 
 interface PixPaymentFormProps {
   amount: number;
@@ -38,6 +39,10 @@ export function PixPaymentForm({
   };
 
   const handleCopyPixKey = async () => {
+    if (!pixKey) {
+      toast.error('Chave Pix não configurada');
+      return;
+    }
     try {
       await navigator.clipboard.writeText(pixKey);
       setCopied(true);
@@ -80,6 +85,20 @@ export function PixPaymentForm({
     }
   };
 
+  if (!pixKey) {
+    return (
+      <div className="p-6 bg-warning/10 border border-warning/30 rounded-lg text-center space-y-3">
+        <AlertCircle className="w-8 h-8 text-warning mx-auto" />
+        <div className="space-y-1">
+          <p className="font-medium text-foreground">Pix não disponível</p>
+          <p className="text-sm text-muted-foreground">
+            A chave Pix não está configurada. Por favor, escolha outro método de pagamento.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (submitted) {
     return (
       <div className="text-center space-y-6 py-6">
@@ -102,8 +121,13 @@ export function PixPaymentForm({
   return (
     <div className="space-y-6">
       <div className="bg-muted/30 rounded-xl p-6 text-center space-y-4">
-        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-          <QrCode className="w-8 h-8 text-primary" />
+        {/* QR Code Image */}
+        <div className="flex justify-center">
+          <img 
+            src={pixQrCode} 
+            alt="QR Code Pix" 
+            className="w-48 h-48 rounded-lg border border-border/50"
+          />
         </div>
         
         <div className="space-y-1">
@@ -112,12 +136,12 @@ export function PixPaymentForm({
         </div>
 
         <div className="space-y-3">
-          <p className="text-sm text-muted-foreground">Copie a chave Pix abaixo:</p>
+          <p className="text-sm text-muted-foreground">Ou copie a chave Pix:</p>
           <div className="flex gap-2">
             <Input 
               value={pixKey} 
               readOnly 
-              className="text-center font-mono bg-background"
+              className="text-center font-mono bg-background text-sm"
             />
             <Button
               type="button"
@@ -152,11 +176,11 @@ export function PixPaymentForm({
         <ol className="text-sm text-muted-foreground space-y-2">
           <li className="flex gap-2">
             <span className="w-5 h-5 rounded-full bg-primary/20 text-primary text-xs flex items-center justify-center shrink-0">1</span>
-            Abra o app do seu banco
+            Escaneie o QR Code ou copie a chave Pix acima
           </li>
           <li className="flex gap-2">
             <span className="w-5 h-5 rounded-full bg-primary/20 text-primary text-xs flex items-center justify-center shrink-0">2</span>
-            Escolha a opção Pix e cole a chave copiada
+            Abra o app do seu banco e faça o Pix
           </li>
           <li className="flex gap-2">
             <span className="w-5 h-5 rounded-full bg-primary/20 text-primary text-xs flex items-center justify-center shrink-0">3</span>
