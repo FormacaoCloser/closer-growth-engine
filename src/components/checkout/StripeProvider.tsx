@@ -1,8 +1,15 @@
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe, Appearance } from '@stripe/stripe-js';
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
+import { AlertCircle } from 'lucide-react';
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
+const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '';
+
+// Validate key format
+const isValidStripeKey = stripePublishableKey && 
+  (stripePublishableKey.startsWith('pk_test_') || stripePublishableKey.startsWith('pk_live_'));
+
+const stripePromise = isValidStripeKey ? loadStripe(stripePublishableKey) : null;
 
 const appearance: Appearance = {
   theme: 'night',
@@ -49,11 +56,38 @@ interface StripeProviderProps {
 }
 
 export function StripeProvider({ clientSecret, children }: StripeProviderProps) {
-  const options = {
+  const options = useMemo(() => ({
     clientSecret,
     appearance,
     locale: 'pt-BR' as const,
-  };
+  }), [clientSecret]);
+
+  // Show error if Stripe key is invalid
+  if (!isValidStripeKey) {
+    console.error('Invalid or missing VITE_STRIPE_PUBLISHABLE_KEY:', stripePublishableKey ? 'Invalid format' : 'Missing');
+    return (
+      <div className="p-6 bg-destructive/10 border border-destructive/30 rounded-lg text-center space-y-3">
+        <AlertCircle className="w-8 h-8 text-destructive mx-auto" />
+        <div className="space-y-1">
+          <p className="font-medium text-destructive">Erro de configuração</p>
+          <p className="text-sm text-muted-foreground">
+            A chave do Stripe não está configurada corretamente. Por favor, contate o suporte.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!stripePromise) {
+    return (
+      <div className="p-6 bg-destructive/10 border border-destructive/30 rounded-lg text-center space-y-3">
+        <AlertCircle className="w-8 h-8 text-destructive mx-auto" />
+        <p className="text-sm text-muted-foreground">
+          Erro ao inicializar o processador de pagamentos.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <Elements stripe={stripePromise} options={options}>

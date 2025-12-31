@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, FileText, Shield } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { Loader2, FileText, Shield, ExternalLink, Check } from 'lucide-react';
+import { PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
 interface BoletoPaymentFormProps {
   amount: number;
@@ -15,16 +15,13 @@ interface BoletoPaymentFormProps {
 }
 
 export function BoletoPaymentForm({ amount, name, email, courseId, onSuccess, onError }: BoletoPaymentFormProps) {
-  const [isProcessing, setIsProcessing] = useState(false);
+  const stripe = useStripe();
+  const elements = useElements();
   
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [boletoGenerated, setBoletoGenerated] = useState(false);
+  const [boletoUrl, setBoletoUrl] = useState<string | null>(null);
   const [cpf, setCpf] = useState('');
-  const [address, setAddress] = useState({
-    city: '',
-    state: '',
-    postal_code: '',
-    street: '',
-    number: '',
-  });
 
   const formatCPF = (value: string) => {
     const digits = value.replace(/\D/g, '');
@@ -32,12 +29,6 @@ export function BoletoPaymentForm({ amount, name, email, courseId, onSuccess, on
     if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
     if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
     return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9, 11)}`;
-  };
-
-  const formatPostalCode = (value: string) => {
-    const digits = value.replace(/\D/g, '');
-    if (digits.length <= 5) return digits;
-    return `${digits.slice(0, 5)}-${digits.slice(5, 8)}`;
   };
 
   const formatCurrency = (cents: number) => {
@@ -49,57 +40,67 @@ export function BoletoPaymentForm({ amount, name, email, courseId, onSuccess, on
 
   const isFormValid = () => {
     const cpfDigits = cpf.replace(/\D/g, '');
-    const postalDigits = address.postal_code.replace(/\D/g, '');
-    
-    return (
-      cpfDigits.length === 11 &&
-      address.city.length >= 2 &&
-      address.state.length === 2 &&
-      postalDigits.length === 8 &&
-      address.street.length >= 3 &&
-      address.number.length >= 1
-    );
+    return cpfDigits.length === 11;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!stripe || !elements) {
+      onError('Stripe não inicializado. Aguarde e tente novamente.');
+      return;
+    }
+
     if (!isFormValid()) {
-      onError('Por favor, preencha todos os campos corretamente.');
+      onError('Por favor, preencha o CPF corretamente.');
       return;
     }
 
     setIsProcessing(true);
 
     try {
-      // Use the create-checkout function with boleto method
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: {
-          name,
-          email,
-          course_id: courseId,
-          payment_method: 'boleto',
-          cpf: cpf.replace(/\D/g, ''),
-          address: {
-            city: address.city,
-            state: address.state,
-            postal_code: address.postal_code.replace(/\D/g, ''),
-            line1: `${address.street}, ${address.number}`,
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/payment-success`,
+          payment_method_data: {
+            billing_details: {
+              name,
+              email,
+            },
           },
         },
+        redirect: 'if_required',
       });
 
       if (error) {
         console.error('Boleto error:', error);
-        onError('Erro ao gerar boleto. Tente novamente.');
+        onError(error.message || 'Erro ao gerar boleto. Tente novamente.');
         return;
       }
 
-      if (data?.url) {
-        // Redirect to Stripe checkout for boleto
-        window.location.href = data.url;
-      } else {
+      // Check if boleto was generated (requires_action means we have the boleto URL)
+      if (paymentIntent?.status === 'requires_action' && paymentIntent.next_action?.type === 'boleto_display_details') {
+        // Type assertion for boleto-specific next_action structure
+        const nextAction = paymentIntent.next_action as { 
+          type: string; 
+          boleto_display_details?: { hosted_voucher_url?: string } 
+        };
+        const hostedVoucherUrl = nextAction.boleto_display_details?.hosted_voucher_url;
+        if (hostedVoucherUrl) {
+          setBoletoUrl(hostedVoucherUrl);
+          setBoletoGenerated(true);
+          onSuccess(hostedVoucherUrl);
+          return;
+        }
+      }
+
+      // For other successful states
+      if (paymentIntent?.status === 'processing' || paymentIntent?.status === 'requires_action') {
+        setBoletoGenerated(true);
         onSuccess();
+      } else {
+        onError('Status de pagamento inesperado. Por favor, tente novamente.');
       }
     } catch (err) {
       console.error('Unexpected error:', err);
@@ -109,11 +110,44 @@ export function BoletoPaymentForm({ amount, name, email, courseId, onSuccess, on
     }
   };
 
+  if (boletoGenerated) {
+    return (
+      <div className="text-center space-y-6 py-6">
+        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+          <Check className="w-8 h-8 text-primary" />
+        </div>
+        <div className="space-y-2">
+          <h3 className="text-xl font-semibold text-foreground">Boleto Gerado!</h3>
+          <p className="text-muted-foreground">
+            Você também receberá o boleto por e-mail em <strong>{email}</strong>.
+          </p>
+        </div>
+        {boletoUrl && (
+          <Button 
+            onClick={() => window.open(boletoUrl, '_blank')}
+            className="btn-cta"
+          >
+            <ExternalLink className="w-4 h-4 mr-2" />
+            Abrir Boleto
+          </Button>
+        )}
+        <div className="bg-muted/50 rounded-lg p-4 space-y-2 text-left">
+          <p className="text-sm text-muted-foreground">
+            O boleto vence em <strong className="text-foreground">3 dias úteis</strong>.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Após o pagamento, o acesso é liberado em até <strong className="text-foreground">2 dias úteis</strong>.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label>CPF</Label>
+          <Label>CPF (obrigatório para boleto)</Label>
           <Input
             placeholder="000.000.000-00"
             value={cpf}
@@ -123,56 +157,21 @@ export function BoletoPaymentForm({ amount, name, email, courseId, onSuccess, on
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>CEP</Label>
-            <Input
-              placeholder="00000-000"
-              value={address.postal_code}
-              onChange={(e) => setAddress({ ...address, postal_code: formatPostalCode(e.target.value) })}
-              maxLength={9}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Estado</Label>
-            <Input
-              placeholder="SP"
-              value={address.state}
-              onChange={(e) => setAddress({ ...address, state: e.target.value.toUpperCase() })}
-              maxLength={2}
-              required
-            />
-          </div>
-        </div>
-
+        {/* Stripe PaymentElement for boleto */}
         <div className="space-y-2">
-          <Label>Cidade</Label>
-          <Input
-            placeholder="São Paulo"
-            value={address.city}
-            onChange={(e) => setAddress({ ...address, city: e.target.value })}
-            required
-          />
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          <div className="col-span-2 space-y-2">
-            <Label>Rua</Label>
-            <Input
-              placeholder="Rua Example"
-              value={address.street}
-              onChange={(e) => setAddress({ ...address, street: e.target.value })}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Número</Label>
-            <Input
-              placeholder="123"
-              value={address.number}
-              onChange={(e) => setAddress({ ...address, number: e.target.value })}
-              required
+          <Label>Dados do Boleto</Label>
+          <div className="p-4 bg-background rounded-lg border border-border">
+            <PaymentElement 
+              options={{
+                layout: 'tabs',
+                paymentMethodOrder: ['boleto'],
+                fields: {
+                  billingDetails: {
+                    name: 'never',
+                    email: 'never',
+                  },
+                },
+              }}
             />
           </div>
         </div>
@@ -189,7 +188,7 @@ export function BoletoPaymentForm({ amount, name, email, courseId, onSuccess, on
 
       <Button
         type="submit"
-        disabled={isProcessing || !isFormValid()}
+        disabled={isProcessing || !isFormValid() || !stripe || !elements}
         className="w-full btn-cta py-6 text-lg"
       >
         {isProcessing ? (
@@ -207,7 +206,7 @@ export function BoletoPaymentForm({ amount, name, email, courseId, onSuccess, on
 
       <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
         <Shield className="w-4 h-4" />
-        <span>Boleto gerado via Stripe</span>
+        <span>Boleto processado via Stripe</span>
       </div>
     </form>
   );

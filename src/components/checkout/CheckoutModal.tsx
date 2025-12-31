@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -33,8 +33,14 @@ interface CheckoutModalProps {
 
 export function CheckoutModal({ isOpen, onClose, onSuccess, leadData, courseData }: CheckoutModalProps) {
   const [activeTab, setActiveTab] = useState('card');
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  
+  // Separate clientSecrets for card and boleto to avoid conflicts
+  const [clientSecretCard, setClientSecretCard] = useState<string | null>(null);
+  const [clientSecretBoleto, setClientSecretBoleto] = useState<string | null>(null);
+  
+  const [isLoadingCard, setIsLoadingCard] = useState(false);
+  const [isLoadingBoleto, setIsLoadingBoleto] = useState(false);
+  
   const [error, setError] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [boletoUrl, setBoletoUrl] = useState<string | null>(null);
@@ -49,15 +55,11 @@ export function CheckoutModal({ isOpen, onClose, onSuccess, leadData, courseData
     }).format(cents / 100);
   };
 
-  // Create PaymentIntent when modal opens or tab changes
-  useEffect(() => {
-    if (isOpen && (activeTab === 'card' || activeTab === 'boleto')) {
-      createPaymentIntent();
-    }
-  }, [isOpen, activeTab]);
-
-  const createPaymentIntent = async () => {
-    setIsLoading(true);
+  const createPaymentIntent = useCallback(async (paymentMethod: 'card' | 'boleto') => {
+    const setLoading = paymentMethod === 'card' ? setIsLoadingCard : setIsLoadingBoleto;
+    const setClientSecret = paymentMethod === 'card' ? setClientSecretCard : setClientSecretBoleto;
+    
+    setLoading(true);
     setError(null);
     
     try {
@@ -67,7 +69,7 @@ export function CheckoutModal({ isOpen, onClose, onSuccess, leadData, courseData
           email: leadData.email,
           phone: leadData.phone,
           course_id: courseData.id,
-          payment_method: activeTab,
+          payment_method: paymentMethod,
         },
       });
 
@@ -86,9 +88,35 @@ export function CheckoutModal({ isOpen, onClose, onSuccess, leadData, courseData
       console.error('Unexpected error:', err);
       setError('Erro inesperado. Tente novamente.');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  };
+  }, [leadData, courseData.id]);
+
+  // Create PaymentIntent for card when modal opens
+  useEffect(() => {
+    if (isOpen && activeTab === 'card' && !clientSecretCard) {
+      createPaymentIntent('card');
+    }
+  }, [isOpen, activeTab, clientSecretCard, createPaymentIntent]);
+
+  // Create PaymentIntent for boleto only when boleto tab is opened
+  useEffect(() => {
+    if (isOpen && activeTab === 'boleto' && !clientSecretBoleto) {
+      createPaymentIntent('boleto');
+    }
+  }, [isOpen, activeTab, clientSecretBoleto, createPaymentIntent]);
+
+  // Reset state when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setClientSecretCard(null);
+      setClientSecretBoleto(null);
+      setError(null);
+      setPaymentSuccess(false);
+      setBoletoUrl(null);
+      setActiveTab('card');
+    }
+  }, [isOpen]);
 
   const handlePaymentSuccess = () => {
     setPaymentSuccess(true);
@@ -101,7 +129,6 @@ export function CheckoutModal({ isOpen, onClose, onSuccess, leadData, courseData
   const handleBoletoSuccess = (url?: string) => {
     if (url) {
       setBoletoUrl(url);
-      window.open(url, '_blank');
     }
     toast.success('Boleto gerado! Verifique seu e-mail.');
     setTimeout(() => {
@@ -216,12 +243,12 @@ export function CheckoutModal({ isOpen, onClose, onSuccess, leadData, courseData
           )}
 
           <TabsContent value="card" className="mt-6">
-            {isLoading ? (
+            {isLoadingCard ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
-            ) : clientSecret ? (
-              <StripeProvider clientSecret={clientSecret}>
+            ) : clientSecretCard ? (
+              <StripeProvider clientSecret={clientSecretCard}>
                 <CardPaymentForm
                   amount={courseData.price_cents}
                   onSuccess={handlePaymentSuccess}
@@ -236,19 +263,25 @@ export function CheckoutModal({ isOpen, onClose, onSuccess, leadData, courseData
           </TabsContent>
 
           <TabsContent value="boleto" className="mt-6">
-            {isLoading ? (
+            {isLoadingBoleto ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
+            ) : clientSecretBoleto ? (
+              <StripeProvider clientSecret={clientSecretBoleto}>
+                <BoletoPaymentForm
+                  amount={courseData.price_cents}
+                  name={leadData.name}
+                  email={leadData.email}
+                  courseId={courseData.id}
+                  onSuccess={handleBoletoSuccess}
+                  onError={handlePaymentError}
+                />
+              </StripeProvider>
             ) : (
-              <BoletoPaymentForm
-                amount={courseData.price_cents}
-                name={leadData.name}
-                email={leadData.email}
-                courseId={courseData.id}
-                onSuccess={handleBoletoSuccess}
-                onError={handlePaymentError}
-              />
+              <div className="text-center py-12 text-muted-foreground">
+                Erro ao carregar formulário de boleto.
+              </div>
             )}
           </TabsContent>
 
