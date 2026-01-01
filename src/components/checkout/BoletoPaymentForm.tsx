@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, FileText, Shield, ExternalLink, Check } from 'lucide-react';
+import { Loader2, FileText, Shield, ExternalLink, Check, AlertCircle } from 'lucide-react';
 import { PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
 interface BoletoPaymentFormProps {
@@ -22,6 +22,8 @@ export function BoletoPaymentForm({ amount, name, email, courseId, onSuccess, on
   const [boletoGenerated, setBoletoGenerated] = useState(false);
   const [boletoUrl, setBoletoUrl] = useState<string | null>(null);
   const [cpf, setCpf] = useState('');
+  const [elementReady, setElementReady] = useState(false);
+  const [elementError, setElementError] = useState<string | null>(null);
 
   const formatCPF = (value: string) => {
     const digits = value.replace(/\D/g, '');
@@ -48,6 +50,11 @@ export function BoletoPaymentForm({ amount, name, email, courseId, onSuccess, on
 
     if (!stripe || !elements) {
       onError('Stripe não inicializado. Aguarde e tente novamente.');
+      return;
+    }
+
+    if (!elementReady) {
+      onError('Formulário de pagamento ainda carregando. Aguarde.');
       return;
     }
 
@@ -160,8 +167,19 @@ export function BoletoPaymentForm({ amount, name, email, courseId, onSuccess, on
         {/* Stripe PaymentElement for boleto */}
         <div className="space-y-2">
           <Label>Dados do Boleto</Label>
+          {elementError && (
+            <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-lg flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-destructive">Erro ao carregar formulário</p>
+                <p className="text-xs text-muted-foreground">{elementError}</p>
+              </div>
+            </div>
+          )}
           <div className="p-4 bg-background rounded-lg border border-border">
             <PaymentElement 
+              onReady={() => setElementReady(true)}
+              onLoadError={(e) => setElementError(e.error.message || 'Erro ao carregar formulário de pagamento')}
               options={{
                 layout: 'tabs',
                 paymentMethodOrder: ['boleto'],
@@ -188,7 +206,7 @@ export function BoletoPaymentForm({ amount, name, email, courseId, onSuccess, on
 
       <Button
         type="submit"
-        disabled={isProcessing || !isFormValid() || !stripe || !elements}
+        disabled={isProcessing || !isFormValid() || !stripe || !elements || !elementReady || !!elementError}
         className="w-full btn-cta py-6 text-lg"
       >
         {isProcessing ? (
