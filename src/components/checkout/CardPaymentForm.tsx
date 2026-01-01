@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Button } from '@/components/ui/button';
-import { Loader2, CreditCard, Shield } from 'lucide-react';
+import { Loader2, CreditCard, Shield, AlertCircle } from 'lucide-react';
 
 interface CardPaymentFormProps {
   amount: number;
@@ -13,6 +13,8 @@ export function CardPaymentForm({ amount, onSuccess, onError }: CardPaymentFormP
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [elementReady, setElementReady] = useState(false);
+  const [elementError, setElementError] = useState<string | null>(null);
 
   const formatCurrency = (cents: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -25,6 +27,12 @@ export function CardPaymentForm({ amount, onSuccess, onError }: CardPaymentFormP
     e.preventDefault();
 
     if (!stripe || !elements) {
+      onError('Stripe não inicializado. Aguarde e tente novamente.');
+      return;
+    }
+
+    if (!elementReady) {
+      onError('Formulário de pagamento ainda carregando. Aguarde.');
       return;
     }
 
@@ -62,7 +70,18 @@ export function CardPaymentForm({ amount, onSuccess, onError }: CardPaymentFormP
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-4">
+        {elementError && (
+          <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-lg flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-destructive">Erro ao carregar formulário</p>
+              <p className="text-xs text-muted-foreground">{elementError}</p>
+            </div>
+          </div>
+        )}
         <PaymentElement 
+          onReady={() => setElementReady(true)}
+          onLoadError={(e) => setElementError(e.error.message || 'Erro ao carregar formulário de pagamento')}
           options={{
             layout: 'tabs',
             paymentMethodOrder: ['card'],
@@ -76,7 +95,7 @@ export function CardPaymentForm({ amount, onSuccess, onError }: CardPaymentFormP
 
       <Button
         type="submit"
-        disabled={!stripe || isProcessing}
+        disabled={!stripe || isProcessing || !elementReady || !!elementError}
         className="w-full btn-cta py-6 text-lg"
       >
         {isProcessing ? (
