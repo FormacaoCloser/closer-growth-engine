@@ -2,14 +2,20 @@ import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe, Appearance } from '@stripe/stripe-js';
 import { ReactNode, useMemo } from 'react';
 import { AlertCircle } from 'lucide-react';
-
-const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '';
+import { STRIPE_PUBLISHABLE_KEY } from '@/config/stripe';
 
 // Validate key format
-const isValidStripeKey = stripePublishableKey && 
-  (stripePublishableKey.startsWith('pk_test_') || stripePublishableKey.startsWith('pk_live_'));
+const stripeKey = STRIPE_PUBLISHABLE_KEY.trim();
+const isValidStripeKey = stripeKey.startsWith('pk_test_') || stripeKey.startsWith('pk_live_');
 
-const stripePromise = isValidStripeKey ? loadStripe(stripePublishableKey) : null;
+// Log key info for debugging (safe - only shows prefix and length)
+console.log('[StripeProvider] Key info:', {
+  prefix: stripeKey.substring(0, 8),
+  length: stripeKey.length,
+  isValid: isValidStripeKey
+});
+
+const stripePromise = isValidStripeKey ? loadStripe(stripeKey) : null;
 
 const appearance: Appearance = {
   theme: 'night',
@@ -64,7 +70,7 @@ export function StripeProvider({ clientSecret, children }: StripeProviderProps) 
 
   // Show error if Stripe key is invalid
   if (!isValidStripeKey) {
-    console.error('Invalid or missing VITE_STRIPE_PUBLISHABLE_KEY:', stripePublishableKey ? 'Invalid format' : 'Missing');
+    console.error('[StripeProvider] Invalid Stripe key format');
     return (
       <div className="p-6 bg-destructive/10 border border-destructive/30 rounded-lg text-center space-y-3">
         <AlertCircle className="w-8 h-8 text-destructive mx-auto" />
