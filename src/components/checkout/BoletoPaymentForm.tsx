@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, FileText, Shield, ExternalLink, Check, AlertCircle } from 'lucide-react';
 import { PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -21,28 +20,14 @@ export function BoletoPaymentForm({ amount, name, email, courseId, onSuccess, on
   const [isProcessing, setIsProcessing] = useState(false);
   const [boletoGenerated, setBoletoGenerated] = useState(false);
   const [boletoUrl, setBoletoUrl] = useState<string | null>(null);
-  const [cpf, setCpf] = useState('');
   const [elementReady, setElementReady] = useState(false);
   const [elementError, setElementError] = useState<string | null>(null);
-
-  const formatCPF = (value: string) => {
-    const digits = value.replace(/\D/g, '');
-    if (digits.length <= 3) return digits;
-    if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
-    if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
-    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9, 11)}`;
-  };
 
   const formatCurrency = (cents: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
     }).format(cents / 100);
-  };
-
-  const isFormValid = () => {
-    const cpfDigits = cpf.replace(/\D/g, '');
-    return cpfDigits.length === 11;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,24 +43,21 @@ export function BoletoPaymentForm({ amount, name, email, courseId, onSuccess, on
       return;
     }
 
-    if (!isFormValid()) {
-      onError('Por favor, preencha o CPF corretamente.');
-      return;
-    }
-
     setIsProcessing(true);
 
     try {
+      // Submit the elements first to validate and collect data
+      const { error: submitError } = await elements.submit();
+      if (submitError) {
+        onError(submitError.message || 'Erro ao validar formulário.');
+        setIsProcessing(false);
+        return;
+      }
+
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
           return_url: `${window.location.origin}/payment-success`,
-          payment_method_data: {
-            billing_details: {
-              name,
-              email,
-            },
-          },
         },
         redirect: 'if_required',
       });
@@ -153,18 +135,7 @@ export function BoletoPaymentForm({ amount, name, email, courseId, onSuccess, on
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-4">
-        <div className="space-y-2">
-          <Label>CPF (obrigatório para boleto)</Label>
-          <Input
-            placeholder="000.000.000-00"
-            value={cpf}
-            onChange={(e) => setCpf(formatCPF(e.target.value))}
-            maxLength={14}
-            required
-          />
-        </div>
-
-        {/* Stripe PaymentElement for boleto */}
+        {/* Stripe PaymentElement for boleto - collects CPF and address */}
         <div className="space-y-2">
           <Label>Dados do Boleto</Label>
           {elementError && (
@@ -183,6 +154,12 @@ export function BoletoPaymentForm({ amount, name, email, courseId, onSuccess, on
               options={{
                 layout: 'tabs',
                 paymentMethodOrder: ['boleto'],
+                defaultValues: {
+                  billingDetails: {
+                    name,
+                    email,
+                  },
+                },
                 fields: {
                   billingDetails: {
                     name: 'never',
@@ -206,7 +183,7 @@ export function BoletoPaymentForm({ amount, name, email, courseId, onSuccess, on
 
       <Button
         type="submit"
-        disabled={isProcessing || !isFormValid() || !stripe || !elements || !elementReady || !!elementError}
+        disabled={isProcessing || !stripe || !elements || !elementReady || !!elementError}
         className="w-full btn-cta py-6 text-lg"
       >
         {isProcessing ? (

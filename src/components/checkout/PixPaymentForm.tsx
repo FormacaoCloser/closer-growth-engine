@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, Copy, Check, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import pixQrCode from '@/assets/pix-qrcode.png';
+import QRCode from 'qrcode';
 
 interface PixPaymentFormProps {
   amount: number;
@@ -30,6 +30,26 @@ export function PixPaymentForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+
+  // Generate QR code dynamically from pixKey
+  useEffect(() => {
+    if (pixKey) {
+      QRCode.toDataURL(pixKey, {
+        width: 200,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#ffffff',
+        },
+      })
+        .then(setQrDataUrl)
+        .catch((err) => {
+          console.error('Error generating QR code:', err);
+          setQrDataUrl(null);
+        });
+    }
+  }, [pixKey]);
 
   const formatCurrency = (cents: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -121,13 +141,19 @@ export function PixPaymentForm({
   return (
     <div className="space-y-6">
       <div className="bg-muted/30 rounded-xl p-6 text-center space-y-4">
-        {/* QR Code Image */}
+        {/* Dynamic QR Code */}
         <div className="flex justify-center">
-          <img 
-            src={pixQrCode} 
-            alt="QR Code Pix" 
-            className="w-48 h-48 rounded-lg border border-border/50"
-          />
+          {qrDataUrl ? (
+            <img 
+              src={qrDataUrl} 
+              alt="QR Code Pix" 
+              className="w-48 h-48 rounded-lg border border-border/50 bg-white p-2"
+            />
+          ) : (
+            <div className="w-48 h-48 rounded-lg border border-border/50 bg-muted flex items-center justify-center">
+              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+            </div>
+          )}
         </div>
         
         <div className="space-y-1">
