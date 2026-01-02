@@ -14,7 +14,8 @@ import {
   Settings,
   Menu,
   X,
-  ChevronLeft
+  ChevronLeft,
+  QrCode
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +25,7 @@ const menuItems = [
   { icon: Users, label: "Alunos", href: "/admin/alunos" },
   { icon: FileText, label: "CMS", href: "/admin/cms" },
   { icon: CreditCard, label: "Vendas", href: "/admin/vendas" },
+  { icon: QrCode, label: "Pix Pendentes", href: "/admin/pix" },
   { icon: Link2, label: "Afiliados", href: "/admin/afiliados" },
   { icon: UserCog, label: "Usuários", href: "/admin/usuarios" },
   { icon: Settings, label: "Configurações", href: "/admin/config" },
