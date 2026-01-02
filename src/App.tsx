@@ -30,6 +30,7 @@ import AdminLessons from "./pages/admin/Lessons";
 import AdminStudents from "./pages/admin/Students";
 import AdminCMS from "./pages/admin/CMS";
 import AdminSales from "./pages/admin/Sales";
+import AdminPixPayments from "./pages/admin/PixPayments";
 import AdminAffiliates from "./pages/admin/Affiliates";
 import AdminUsers from "./pages/admin/Users";
 import AdminSettings from "./pages/admin/Settings";
@@ -166,6 +167,14 @@ const App = () => (
               element={
                 <ProtectedRoute requireAdmin>
                   <AdminSales />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/pix"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminPixPayments />
                 </ProtectedRoute>
               }
             />
