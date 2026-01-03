@@ -21,6 +21,7 @@ export function SmartVideoPlayer({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [showPoster, setShowPoster] = useState(true);
 
   // Use refs to keep callbacks stable and avoid re-registering event listeners
   const onPlayPauseRef = useRef(onPlayPause);
@@ -71,6 +72,11 @@ export function SmartVideoPlayer({
     };
   }, []);
 
+  // Hide poster when playing starts
+  useEffect(() => {
+    if (isPlaying) setShowPoster(false);
+  }, [isPlaying]);
+
   const togglePlay = () => {
     const video = videoRef.current;
     if (!video) return;
@@ -102,7 +108,7 @@ export function SmartVideoPlayer({
 
   return (
     <div 
-      className="relative w-full aspect-video bg-background/50 rounded-2xl overflow-hidden border border-border/30 shadow-2xl group"
+      className="relative w-full aspect-video bg-background/50 rounded-xl md:rounded-2xl overflow-hidden border border-border/30 shadow-2xl group"
       onMouseMove={() => setShowControls(true)}
       onMouseLeave={() => isPlaying && setShowControls(false)}
     >
@@ -120,12 +126,29 @@ export function SmartVideoPlayer({
         // Placeholder when no video
         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-background via-card to-background">
           <div className="text-center space-y-4">
-            <div className="w-20 h-20 mx-auto rounded-full bg-primary/20 flex items-center justify-center">
-              <Play className="w-10 h-10 text-primary ml-1" />
+            <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-full bg-primary/20 flex items-center justify-center">
+              <Play className="w-8 h-8 md:w-10 md:h-10 text-primary ml-1" />
             </div>
             <p className="text-muted-foreground text-sm">Vídeo em breve</p>
           </div>
         </div>
+      )}
+
+      {/* Poster Overlay - shown until play starts */}
+      {posterUrl && showPoster && !isPlaying && (
+        <div 
+          className="absolute inset-0 bg-cover bg-center cursor-pointer"
+          style={{ backgroundImage: `url(${posterUrl})` }}
+          onClick={togglePlay}
+        />
+      )}
+
+      {/* Fallback overlay when no poster - gradient with play icon */}
+      {!posterUrl && showPoster && !isPlaying && videoUrl && (
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-background via-card to-background cursor-pointer"
+          onClick={togglePlay}
+        />
       )}
 
       {/* Play/Pause Overlay */}
@@ -136,20 +159,20 @@ export function SmartVideoPlayer({
         onClick={togglePlay}
       >
         {!isPlaying && (
-          <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30 hover:scale-110 transition-transform">
-            <Play className="w-10 h-10 text-primary-foreground ml-1" />
+          <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30 hover:scale-110 transition-transform">
+            <Play className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground ml-1" />
           </div>
         )}
       </div>
 
       {/* Controls Bar */}
       <div 
-        className={`absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background/90 to-transparent transition-opacity duration-300 ${
+        className={`absolute bottom-0 left-0 right-0 p-3 md:p-4 bg-gradient-to-t from-background/90 to-transparent transition-opacity duration-300 ${
           showControls || !isPlaying ? 'opacity-100' : 'opacity-0'
         }`}
       >
         {/* Smart Progress Bar */}
-        <div className="w-full h-1 bg-muted rounded-full mb-3 overflow-hidden">
+        <div className="w-full h-1 bg-muted rounded-full mb-2 md:mb-3 overflow-hidden">
           <div 
             className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-300 ease-out"
             style={{ width: `${displayProgress * 100}%` }}
@@ -163,9 +186,9 @@ export function SmartVideoPlayer({
             className="p-2 rounded-full hover:bg-muted/50 transition-colors"
           >
             {isPlaying ? (
-              <Pause className="w-5 h-5 text-foreground" />
+              <Pause className="w-4 h-4 md:w-5 md:h-5 text-foreground" />
             ) : (
-              <Play className="w-5 h-5 text-foreground ml-0.5" />
+              <Play className="w-4 h-4 md:w-5 md:h-5 text-foreground ml-0.5" />
             )}
           </button>
 
@@ -174,9 +197,9 @@ export function SmartVideoPlayer({
             className="p-2 rounded-full hover:bg-muted/50 transition-colors"
           >
             {isMuted ? (
-              <VolumeX className="w-5 h-5 text-foreground" />
+              <VolumeX className="w-4 h-4 md:w-5 md:h-5 text-foreground" />
             ) : (
-              <Volume2 className="w-5 h-5 text-foreground" />
+              <Volume2 className="w-4 h-4 md:w-5 md:h-5 text-foreground" />
             )}
           </button>
         </div>
