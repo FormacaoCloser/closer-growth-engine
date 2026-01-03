@@ -31,6 +31,7 @@ export function HeroSection({
   const titleHighlightColor = getCMSValue(content, 'hero_title_highlight_color', 'gradient');
   const subtitle = getCMSValue(content, 'hero_subtitle', 'Uma carreira em vendas com salário fixo + comissões atrativas. Startups e empresas de todo o Brasil estão contratando.');
   const videoUrl = getCMSValue(content, 'hero_video_url', 'https://formacaocloser.b-cdn.net/copy_64B2EF33-32DD-4816-8FD5-D93AEEABCB23.mp4');
+  const posterUrl = getCMSValue(content, 'hero_poster_url', '');
   const ctaButton = getCMSValue(content, 'hero_cta_button', 'Matricule-se Agora');
   const ctaSubtext = getCMSValue(content, 'hero_cta_subtext', 'Acesso imediato • Garantia de 7 dias');
 
@@ -42,14 +43,14 @@ export function HeroSection({
     : 'text-gradient';
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center px-4 pt-24 pb-8 relative">
+    <section className="min-h-screen flex flex-col items-center justify-center px-4 pt-20 md:pt-24 pb-6 md:pb-8 relative">
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
       </div>
 
-      <div className="max-w-4xl mx-auto text-center space-y-8 relative z-10">
+      <div className="max-w-4xl mx-auto text-center space-y-6 md:space-y-8 relative z-10">
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
           <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
@@ -69,9 +70,10 @@ export function HeroSection({
         </p>
 
         {/* Video Player */}
-        <div className="w-full max-w-3xl mx-auto mt-8">
+        <div className="w-full max-w-3xl mx-auto mt-6 md:mt-8">
           <SmartVideoPlayer
             videoUrl={videoUrl}
+            posterUrl={posterUrl || undefined}
             displayProgress={displayProgress}
             isPlaying={isPlaying}
             onPlayPause={onPlayPause}
