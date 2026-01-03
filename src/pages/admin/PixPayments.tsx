@@ -120,6 +120,34 @@ export default function AdminPixPayments() {
     });
   }, [payments, search, statusFilter]);
 
+  // Send notification helper
+  const sendNotification = async (
+    type: "approved" | "rejected",
+    payment: any,
+    notes?: string
+  ) => {
+    try {
+      const { error } = await supabase.functions.invoke("send-pix-notification", {
+        body: {
+          type,
+          email: payment.email,
+          name: payment.name,
+          courseName: payment.course?.title,
+          amount_cents: payment.amount_cents,
+          notes,
+        },
+      });
+
+      if (error) {
+        console.error("Error sending notification:", error);
+        toast.warning("Pagamento processado, mas houve erro ao enviar email.");
+      }
+    } catch (err) {
+      console.error("Failed to send notification:", err);
+      toast.warning("Pagamento processado, mas houve erro ao enviar email.");
+    }
+  };
+
   // Approve payment mutation
   const approveMutation = useMutation({
     mutationFn: async ({ paymentId, notes }: { paymentId: string; notes: string }) => {
@@ -147,6 +175,7 @@ export default function AdminPixPayments() {
         .single();
 
       let userId = existingProfile?.user_id;
+      let enrollmentCreated = false;
 
       // If no profile exists, we'll create a placeholder
       // Note: This requires the user to sign up later
@@ -154,11 +183,8 @@ export default function AdminPixPayments() {
         // We can't create auth users from client side without service role
         // So we'll skip enrollment creation for now and notify admin
         toast.warning("Usuário não cadastrado. A matrícula será criada quando o aluno se cadastrar.");
-        return { enrollmentCreated: false };
-      }
-
-      // 3. Create enrollment if we have user_id and course_id
-      if (payment.course_id) {
+      } else if (payment.course_id) {
+        // 3. Create enrollment if we have user_id and course_id
         // Check if enrollment already exists
         const { data: existingEnrollment } = await supabase
           .from("enrollments")
@@ -177,13 +203,18 @@ export default function AdminPixPayments() {
             });
 
           if (enrollError) throw enrollError;
+          enrollmentCreated = true;
         }
       }
 
-      return { enrollmentCreated: true };
+      return { payment, enrollmentCreated, notes };
     },
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       queryClient.invalidateQueries({ queryKey: ["admin-pix-payments"] });
+      
+      // Send email notification
+      await sendNotification("approved", result.payment, result.notes);
+      
       if (result.enrollmentCreated) {
         toast.success("Pagamento aprovado e matrícula criada com sucesso!");
       } else {
@@ -201,6 +232,9 @@ export default function AdminPixPayments() {
     mutationFn: async ({ paymentId, notes }: { paymentId: string; notes: string }) => {
       if (!notes.trim()) throw new Error("Motivo da rejeição é obrigatório");
 
+      const payment = payments.find((p) => p.id === paymentId);
+      if (!payment) throw new Error("Pagamento não encontrado");
+
       const { error } = await supabase
         .from("manual_pix_payments")
         .update({
@@ -212,9 +246,15 @@ export default function AdminPixPayments() {
         .eq("id", paymentId);
 
       if (error) throw error;
+
+      return { payment, notes };
     },
-    onSuccess: () => {
+    onSuccess: async (result) => {
       queryClient.invalidateQueries({ queryKey: ["admin-pix-payments"] });
+      
+      // Send email notification
+      await sendNotification("rejected", result.payment, result.notes);
+      
       toast.success("Pagamento rejeitado.");
       closeDialog();
     },
