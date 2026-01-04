@@ -134,7 +134,7 @@ export function SmartVideoPlayer({
         </div>
       )}
 
-      {/* Poster Overlay - shown until play starts */}
+      {/* Poster Overlay - only shown when posterUrl exists */}
       {posterUrl && showPoster && !isPlaying && (
         <div 
           className="absolute inset-0 bg-cover bg-center cursor-pointer"
@@ -143,19 +143,11 @@ export function SmartVideoPlayer({
         />
       )}
 
-      {/* Fallback overlay when no poster - gradient with play icon */}
-      {!posterUrl && showPoster && !isPlaying && videoUrl && (
-        <div 
-          className="absolute inset-0 bg-gradient-to-br from-background via-card to-background cursor-pointer"
-          onClick={togglePlay}
-        />
-      )}
-
-      {/* Play/Pause Overlay */}
+      {/* Play/Pause Overlay - transparent when no poster so video frame shows */}
       <div 
-        className={`absolute inset-0 flex items-center justify-center bg-background/30 transition-opacity duration-300 cursor-pointer ${
+        className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 cursor-pointer ${
           showControls || !isPlaying ? 'opacity-100' : 'opacity-0'
-        }`}
+        } ${!isPlaying && posterUrl ? 'bg-background/30' : ''}`}
         onClick={togglePlay}
       >
         {!isPlaying && (
