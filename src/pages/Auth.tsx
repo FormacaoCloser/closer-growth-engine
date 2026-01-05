@@ -239,6 +239,18 @@ export default function Auth() {
               </div>
             )}
 
+            {isLogin && (
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={() => navigate("/esqueci-senha")}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Esqueci minha senha
+                </button>
+              </div>
+            )}
+
             <Button
               type="submit"
               className="w-full h-12 text-base font-semibold"
