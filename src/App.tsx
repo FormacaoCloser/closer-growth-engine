@@ -9,6 +9,8 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 // Pages
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Enrollment from "./pages/Enrollment";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
@@ -48,6 +50,8 @@ const App = () => (
           {/* Public Routes */}
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/esqueci-senha" element={<ForgotPassword />} />
+            <Route path="/redefinir-senha" element={<ResetPassword />} />
             <Route path="/matricula" element={<Enrollment />} />
             <Route path="/pagamento-sucesso" element={<PaymentSuccess />} />
             <Route path="/pagamento-cancelado" element={<PaymentCanceled />} />
