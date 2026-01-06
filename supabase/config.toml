@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.send-pix-notification]
 verify_jwt = false
+
+[functions.check-certificate]
+verify_jwt = false
