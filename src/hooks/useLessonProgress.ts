@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface UseLessonProgressOptions {
   lessonId: string;
@@ -45,8 +46,33 @@ export function useLessonProgress({
     loadProgress();
   }, [user?.id, lessonId]);
 
+  // Check for certificate after completing a lesson
+  const checkCertificate = useCallback(async () => {
+    if (!user?.id || !lessonId) return;
+
+    try {
+      const { data, error } = await supabase.functions.invoke("check-certificate", {
+        body: { userId: user.id, lessonId },
+      });
+
+      if (error) {
+        console.error("Error checking certificate:", error);
+        return;
+      }
+
+      if (data?.issued) {
+        toast.success("🎓 Parabéns! Você concluiu o curso e recebeu seu certificado!", {
+          duration: 8000,
+          description: `Código: ${data.code}`,
+        });
+      }
+    } catch (err) {
+      console.error("Error invoking check-certificate:", err);
+    }
+  }, [user?.id, lessonId]);
+
   // Save progress to database
-  const saveProgress = useCallback(async (seconds: number, completed: boolean) => {
+  const saveProgress = useCallback(async (seconds: number, completed: boolean, shouldCheckCertificate = false) => {
     if (!user?.id || !lessonId) return;
 
     const { error } = await supabase
@@ -65,7 +91,12 @@ export function useLessonProgress({
     if (error) {
       console.error("Error saving progress:", error);
     }
-  }, [user?.id, lessonId]);
+
+    // Check for certificate after saving completion
+    if (shouldCheckCertificate && completed) {
+      await checkCertificate();
+    }
+  }, [user?.id, lessonId, checkCertificate]);
 
   // Update progress (debounced save every 10 seconds)
   const updateProgress = useCallback((currentTime: number, duration: number) => {
@@ -79,7 +110,7 @@ export function useLessonProgress({
 
     if (shouldComplete) {
       setIsCompleted(true);
-      saveProgress(currentTime, true);
+      saveProgress(currentTime, true, true); // Check certificate on completion
       return;
     }
 
@@ -87,14 +118,14 @@ export function useLessonProgress({
     const now = Date.now();
     if (now - lastSaveRef.current >= 10000) {
       lastSaveRef.current = now;
-      saveProgress(currentTime, isCompleted);
+      saveProgress(currentTime, isCompleted, false);
     } else {
       // Schedule save for later
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
       saveTimeoutRef.current = setTimeout(() => {
-        saveProgress(currentTime, isCompleted);
+        saveProgress(currentTime, isCompleted, false);
         lastSaveRef.current = Date.now();
       }, 10000);
     }
@@ -105,7 +136,7 @@ export function useLessonProgress({
     if (!user?.id || isCompleted) return;
     
     setIsCompleted(true);
-    await saveProgress(watchedSeconds, true);
+    await saveProgress(watchedSeconds, true, true); // Check certificate on manual completion
   }, [user?.id, isCompleted, watchedSeconds, saveProgress]);
 
   // Save on unmount
