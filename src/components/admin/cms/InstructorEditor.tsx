@@ -25,6 +25,7 @@ export function InstructorEditor({ content, isLoading }: InstructorEditorProps) 
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
+  const [posterUrl, setPosterUrl] = useState('');
   const [bioTitle, setBioTitle] = useState('');
   const [bioText1, setBioText1] = useState('');
   const [bioText2, setBioText2] = useState('');
@@ -37,6 +38,7 @@ export function InstructorEditor({ content, isLoading }: InstructorEditorProps) 
       setTitle(getCMSValue(content, 'instructor_title', 'Quem é Alexandre Closer?'));
       setSubtitle(getCMSValue(content, 'instructor_subtitle', ''));
       setVideoUrl(getCMSValue(content, 'instructor_video_url', ''));
+      setPosterUrl(getCMSValue(content, 'instructor_video_poster', ''));
       setBioTitle(getCMSValue(content, 'instructor_bio_title', ''));
       setBioText1(getCMSValue(content, 'instructor_bio_text1', ''));
       setBioText2(getCMSValue(content, 'instructor_bio_text2', ''));
@@ -51,6 +53,7 @@ export function InstructorEditor({ content, isLoading }: InstructorEditorProps) 
         { contentKey: 'instructor_title', contentValue: title },
         { contentKey: 'instructor_subtitle', contentValue: subtitle },
         { contentKey: 'instructor_video_url', contentValue: videoUrl, contentType: 'video' },
+        { contentKey: 'instructor_video_poster', contentValue: posterUrl, contentType: 'image' },
         { contentKey: 'instructor_bio_title', contentValue: bioTitle },
         { contentKey: 'instructor_bio_text1', contentValue: bioText1 },
         { contentKey: 'instructor_bio_text2', contentValue: bioText2 },
@@ -116,7 +119,7 @@ export function InstructorEditor({ content, isLoading }: InstructorEditorProps) 
         <CardHeader>
           <CardTitle>Vídeo do Instrutor</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="videoUrl">URL do Vídeo</Label>
             <Input
@@ -128,6 +131,20 @@ export function InstructorEditor({ content, isLoading }: InstructorEditorProps) 
             />
             <p className="text-xs text-muted-foreground">
               Deixe vazio para mostrar placeholder "Em breve"
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="posterUrl">Thumbnail do Vídeo</Label>
+            <Input
+              id="posterUrl"
+              value={posterUrl}
+              onChange={(e) => setPosterUrl(e.target.value)}
+              placeholder="https://..."
+              type="url"
+            />
+            <p className="text-xs text-muted-foreground">
+              Imagem exibida antes do vídeo começar a tocar
             </p>
           </div>
         </CardContent>

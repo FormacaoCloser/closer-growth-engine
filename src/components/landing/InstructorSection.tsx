@@ -1,7 +1,8 @@
 import { Play } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { CMSContent, getCMSValue, getCMSJson } from '@/hooks/useCMSContent';
 import { getIcon } from '@/lib/iconMap';
+import { SmartVideoPlayer } from './SmartVideoPlayer';
 
 interface StatItem {
   icon: string;
@@ -20,8 +21,8 @@ interface InstructorSectionProps {
 }
 
 export function InstructorSection({ content }: InstructorSectionProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   // Get CMS values with fallbacks
   const title = getCMSValue(content, 'instructor_title', 'Quem é <span class="text-gradient">Alexandre Closer</span>?');
@@ -30,17 +31,13 @@ export function InstructorSection({ content }: InstructorSectionProps) {
   const bio1 = getCMSValue(content, 'instructor_bio_text1', 'Alexandre começou sua jornada em vendas há mais de 7 anos, quando o termo "closer" ainda nem existia no Brasil. Depois de fechar milhões em vendas para grandes empresas do digital, decidiu compartilhar seu método com quem quer transformar sua vida através das vendas.');
   const bio2 = getCMSValue(content, 'instructor_bio_text2', 'Sua metodologia é prática, direta e focada em resultados. Nada de teoria acadêmica que não funciona no mundo real. Apenas o que realmente faz você fechar vendas e colocar dinheiro no bolso.');
   const videoUrl = getCMSValue(content, 'instructor_video_url', '');
+  const posterUrl = getCMSValue(content, 'instructor_video_poster', '');
   const stats = getCMSJson<StatItem[]>(content, 'instructor_stats', defaultStats);
 
-  const handlePlayPause = () => {
-    if (!videoRef.current) return;
-    
-    if (isPlaying) {
-      videoRef.current.pause();
-    } else {
-      videoRef.current.play();
+  const handleTimeUpdate = (currentTime: number, duration: number) => {
+    if (duration > 0) {
+      setProgress(currentTime / duration);
     }
-    setIsPlaying(!isPlaying);
   };
 
   return (
@@ -59,29 +56,16 @@ export function InstructorSection({ content }: InstructorSectionProps) {
 
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Video Container */}
-          <div className="relative aspect-video rounded-2xl overflow-hidden bg-background border border-border/50 group">
+          <div className="relative aspect-video rounded-2xl overflow-hidden bg-background border border-border/50">
             {videoUrl ? (
-              <>
-                <video
-                  ref={videoRef}
-                  src={videoUrl}
-                  className="w-full h-full object-cover"
-                  onPlay={() => setIsPlaying(true)}
-                  onPause={() => setIsPlaying(false)}
-                  onEnded={() => setIsPlaying(false)}
-                />
-                {/* Play/Pause Overlay */}
-                <button
-                  onClick={handlePlayPause}
-                  className={`absolute inset-0 flex items-center justify-center bg-background/30 transition-opacity ${
-                    isPlaying ? 'opacity-0 hover:opacity-100' : 'opacity-100'
-                  }`}
-                >
-                  <div className="w-20 h-20 rounded-full bg-primary/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Play className="w-8 h-8 text-primary-foreground ml-1" />
-                  </div>
-                </button>
-              </>
+              <SmartVideoPlayer
+                videoUrl={videoUrl}
+                posterUrl={posterUrl}
+                displayProgress={progress}
+                isPlaying={isPlaying}
+                onPlayPause={setIsPlaying}
+                onTimeUpdate={handleTimeUpdate}
+              />
             ) : (
               // Placeholder when no video
               <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
