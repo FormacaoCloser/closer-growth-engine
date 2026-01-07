@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.check-certificate]
 verify_jwt = false
+
+[functions.recover-abandoned-carts]
+verify_jwt = false
