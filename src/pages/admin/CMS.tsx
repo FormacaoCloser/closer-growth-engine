@@ -7,7 +7,8 @@ import { FAQEditor } from "@/components/admin/cms/FAQEditor";
 import { InstructorEditor } from "@/components/admin/cms/InstructorEditor";
 import { JourneyEditor } from "@/components/admin/cms/JourneyEditor";
 import { CTAEditor } from "@/components/admin/cms/CTAEditor";
-import { Home, Star, HelpCircle, User, MapPin, MousePointerClick, ExternalLink } from "lucide-react";
+import { MiniCTAEditor } from "@/components/admin/cms/MiniCTAEditor";
+import { Home, Star, HelpCircle, User, MapPin, MousePointerClick, Zap, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function AdminCMS() {
@@ -25,7 +26,7 @@ export default function AdminCMS() {
       </div>
 
       <Tabs defaultValue="hero" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 h-auto">
+        <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 h-auto">
           <TabsTrigger value="hero" className="flex items-center gap-2 py-3">
             <Home className="h-4 w-4" />
             <span className="hidden sm:inline">Hero</span>
@@ -49,6 +50,10 @@ export default function AdminCMS() {
           <TabsTrigger value="cta" className="flex items-center gap-2 py-3">
             <MousePointerClick className="h-4 w-4" />
             <span className="hidden sm:inline">CTAs</span>
+          </TabsTrigger>
+          <TabsTrigger value="minicta" className="flex items-center gap-2 py-3">
+            <Zap className="h-4 w-4" />
+            <span className="hidden sm:inline">Mini CTA</span>
           </TabsTrigger>
         </TabsList>
 
@@ -74,6 +79,10 @@ export default function AdminCMS() {
 
         <TabsContent value="cta">
           <CTAEditor content={content} isLoading={isLoading} />
+        </TabsContent>
+
+        <TabsContent value="minicta">
+          <MiniCTAEditor content={content} isLoading={isLoading} />
         </TabsContent>
       </Tabs>
     </AdminLayout>

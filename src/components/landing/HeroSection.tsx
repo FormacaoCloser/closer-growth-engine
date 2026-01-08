@@ -32,7 +32,7 @@ export function HeroSection({
   const subtitle = getCMSValue(content, 'hero_subtitle', 'Uma carreira em vendas com salário fixo + comissões atrativas. Startups e empresas de todo o Brasil estão contratando.');
   const videoUrl = getCMSValue(content, 'hero_video_url', 'https://formacaocloser.b-cdn.net/copy_64B2EF33-32DD-4816-8FD5-D93AEEABCB23.mp4');
   const posterUrl = getCMSValue(content, 'hero_poster_url', '');
-  const ctaButton = getCMSValue(content, 'hero_cta_button', 'Matricule-se Agora');
+  const ctaButton = getCMSValue(content, 'hero_cta_text', 'Matricule-se Agora');
   const ctaSubtext = getCMSValue(content, 'hero_cta_subtext', 'Acesso imediato • Garantia de 7 dias');
 
   // Map highlight color to CSS class

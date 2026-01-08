@@ -64,7 +64,7 @@ export default function Index() {
         <BenefitsSection content={cmsContent} />
         <CTASection content={cmsContent} onCTAClick={handleCTAClick} />
         <ObjectionsSection content={cmsContent} />
-        <MiniCTASection onCTAClick={handleCTAClick} />
+        <MiniCTASection content={cmsContent} onCTAClick={handleCTAClick} />
         <InstructorSection content={cmsContent} />
         <CTASection content={cmsContent} onCTAClick={handleCTAClick} />
         <JourneySection content={cmsContent} />
